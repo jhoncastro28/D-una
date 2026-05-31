@@ -84,8 +84,3 @@ D-una/
 | Rosa     | `#ff007c` |
 
 ---
-
-## Notas
-
-- Este proyecto es un prototipo funcional para presentación universitaria. No está conectado a un backend real; los datos de eventos son simulados.
-- El `.claude/` está en `.gitignore` y no se sube al repositorio.
