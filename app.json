@@ -3,14 +3,14 @@
     "name": "D'una",
     "slug": "duna",
     "version": "1.0.0",
-    "sdkVersion": "52.0.0",
+    "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#6B21FF"
+      "backgroundColor": "#6e10f7"
     },
     "ios": {
       "supportsTablet": false,
@@ -18,8 +18,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundColor": "#6B21FF"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#6e10f7"
       },
       "package": "com.duna.app"
     }

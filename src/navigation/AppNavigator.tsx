@@ -32,7 +32,7 @@ export default function AppNavigator() {
       <Stack.Navigator
         id={undefined}
         initialRouteName="Splash"
-        screenOptions={{ headerShown: false, gestureEnabled: true, animationEnabled: true }}
+        screenOptions={{ headerShown: false, gestureEnabled: true }}
       >
         {/* ── Onboarding ── */}
         <Stack.Screen name="Splash"      component={SplashScreen} />
