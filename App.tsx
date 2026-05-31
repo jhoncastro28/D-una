@@ -1,20 +1,46 @@
+import 'react-native-gesture-handler';
+import React from 'react';
+import { Text, View, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  useFonts,
+  Poppins_400Regular,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+  Poppins_800ExtraBold,
+  Poppins_900Black,
+} from '@expo-google-fonts/poppins';
+import AppNavigator from './src/navigation/AppNavigator';
+import { C } from './src/constants';
+
+// Poppins como fuente base para todos los Text de la app
+const defaultTextStyle = Text as any;
+if (defaultTextStyle.defaultProps == null) {
+  defaultTextStyle.defaultProps = {};
+}
+defaultTextStyle.defaultProps.style = { fontFamily: 'Poppins_400Regular' };
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+    Poppins_800ExtraBold,
+    Poppins_900Black,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, backgroundColor: C.purple, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator color={C.pink} size="large" />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style="light" />
+      <AppNavigator />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
