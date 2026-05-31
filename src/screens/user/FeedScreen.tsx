@@ -1,49 +1,113 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  StatusBar, Image,
+  StatusBar, Image, ImageBackground, Dimensions,
 } from 'react-native';
-import MapView, { Marker, Callout, PROVIDER_DEFAULT } from 'react-native-maps';
+import { Ionicons } from '@expo/vector-icons';
 import { C } from '../../constants';
 import { Icons } from '../../constants/icons';
-import { MOCK_EVENTS, WEEK_DAYS, TUNJA_REGION } from '../../constants/mockData';
+import { MOCK_EVENTS, WEEK_DAYS } from '../../constants/mockData';
 import BottomNav from '../../components/BottomNav';
+import BoyacaMapSVG, { MapPin } from '../../components/BoyacaMapSVG';
+import { useAuth } from '../../context/AuthContext';
 
-const tunjEvents = MOCK_EVENTS.filter(e => e.municipality === 'Tunja');
+const { width } = Dimensions.get('window');
+
+const TODAY = new Date();
+const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const todayLabel = `${TODAY.getDate()} de ${MONTHS_ES[TODAY.getMonth()]}`;
+
+const CATEGORY_IMG: Record<string, any> = {
+  conciertos:       Icons.catConciertos,
+  talleres:         Icons.catTalleres,
+  ferias:           Icons.catFerias,
+  conferencias:     Icons.catConferencias,
+  eventosculturales:Icons.catEventos,
+  fiestas:          Icons.catFiestas,
+  deportivos:       Icons.catDeportivos,
+  otros:            Icons.catOtros,
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+  conciertos:        C.pink,
+  talleres:          C.teal,
+  ferias:            '#f59e0b',
+  conferencias:      C.purple,
+  eventosculturales: '#3b82f6',
+  fiestas:           '#ec4899',
+  deportivos:        '#22c55e',
+  otros:             C.gray,
+};
 
 export default function FeedScreen({ navigation }: any) {
-  const [activeDay, setActiveDay] = useState(1);
+  const { user, isSaved } = useAuth();
+  const [activeDay, setActiveDay] = useState(0);
+
+  const greeting   = user ? user.name.split(' ')[0] : 'viajero';
+  const municipality = user?.municipality ?? 'Tunja';
+  const initials = user ? user.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() : '?';
+
+  const localEvents = useMemo(
+    () => MOCK_EVENTS.filter(e => e.municipality === municipality),
+    [municipality],
+  );
+
+  // Build map pins for the SVG
+  const mapPins: MapPin[] = useMemo(() =>
+    localEvents.slice(0, 4).map((ev, i) => ({
+      id: ev.id,
+      lat: ev.lat,
+      lng: ev.lng,
+      label: ev.location,
+      sublabel: ev.category.replace('eventosculturales', 'Cultural'),
+      side: i % 2 === 0 ? 'right' : 'left',
+    })),
+    [localEvents],
+  );
+
+  const mapW = width - 68;  // inside card (20 margin each side + 14 padding each side)
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
 
+      {/* Background pattern on the purple top section */}
+      <ImageBackground
+        source={Icons.patternPurple}
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+        pointerEvents="none"
+      />
+
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-            <View style={styles.avatar} />
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{initials}</Text>
+            </View>
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.greeting}>Hola, Nicolás</Text>
-            <Text style={styles.dateText}>Hoy es 19 mayo</Text>
+            <Text style={styles.greeting}>Hola, {greeting}</Text>
+            <Text style={styles.dateText}>Hoy es {todayLabel}</Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('FeedFilter')}>
-            <Image source={Icons.search} style={styles.searchIcon} resizeMode="contain" />
+            <Ionicons name="search" size={26} color={C.white} />
           </TouchableOpacity>
         </View>
 
         <Text style={styles.mainTitle}>¿Qué plan estás{'\n'}buscando hoy?</Text>
 
-        <View style={styles.banner}>
-          <Text style={styles.bannerText}>D'una</Text>
+        {/* D'una banner (Patron 3) */}
+        <View style={styles.bannerWrap}>
+          <Image source={Icons.patternBanner} style={styles.bannerImg} resizeMode="cover" />
         </View>
 
         {/* Carrusel de días */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayRow}>
           {WEEK_DAYS.map((d, i) => (
             <TouchableOpacity
-              key={i}
+              key={`day-${d.day}`}
               style={[styles.dayBtn, i === activeDay && styles.dayBtnActive]}
               onPress={() => setActiveDay(i)}
             >
@@ -55,53 +119,56 @@ export default function FeedScreen({ navigation }: any) {
 
         <Text style={styles.nearText}>Estos son los eventos que{'\n'}tenemos cerca de ti!</Text>
 
-        {/* Mapa real de Tunja */}
+        {/* Mapa SVG Boyacá */}
         <View style={styles.mapCard}>
-          <Text style={styles.mapCity}>Tunja</Text>
-          <View style={styles.mapWrap}>
-            <MapView
-              provider={PROVIDER_DEFAULT}
-              style={styles.map}
-              initialRegion={TUNJA_REGION}
-              scrollEnabled={false}
-              zoomEnabled={false}
-              rotateEnabled={false}
-              pitchEnabled={false}
-            >
-              {tunjEvents.map(ev => (
-                <Marker
-                  key={ev.id}
-                  coordinate={{ latitude: ev.lat, longitude: ev.lng }}
-                  pinColor={C.pink}
-                  onPress={() => navigation.navigate('EventDetail', { event: ev })}
-                >
-                  <Callout>
-                    <View style={styles.callout}>
-                      <Text style={styles.calloutTitle}>{ev.location}</Text>
-                      <Text style={styles.calloutSub}>{ev.title}</Text>
-                    </View>
-                  </Callout>
-                </Marker>
-              ))}
-            </MapView>
+          <Text style={styles.mapCity}>{municipality}</Text>
+          <View style={[styles.mapBg, { height: mapW * 0.85 }]}>
+            <BoyacaMapSVG
+              width={mapW}
+              height={mapW * 0.85}
+              fillColor="rgba(148,80,240,0.6)"
+              bgColor="transparent"
+              strokeColor="rgba(200,140,255,0.8)"
+              showPins={mapPins.length > 0}
+              pins={mapPins}
+            />
           </View>
+          <TouchableOpacity
+            style={styles.mapFullBtn}
+            onPress={() => navigation.navigate('MapScreen')}
+          >
+            <Ionicons name="map-outline" size={13} color={C.purple} style={{ marginRight: 4 }} />
+            <Text style={styles.mapFullBtnText}>Ver mapa completo</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Lista de eventos */}
-        {MOCK_EVENTS.map(ev => (
-          <TouchableOpacity
-            key={ev.id}
-            style={styles.eventCard}
-            onPress={() => navigation.navigate('EventDetail', { event: ev })}
-          >
-            <View style={styles.eventImageBox} />
-            <View style={styles.eventInfo}>
-              <Text style={styles.eventTitle} numberOfLines={1}>{ev.title}</Text>
-              <Text style={styles.eventMeta}>{ev.date}    {ev.time}</Text>
-              <Text style={styles.eventMeta}>{ev.location}; {ev.municipality}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {MOCK_EVENTS.map(ev => {
+          const catImg = CATEGORY_IMG[ev.category];
+          const catColor = CATEGORY_COLORS[ev.category] ?? C.purple;
+          return (
+            <TouchableOpacity
+              key={ev.id}
+              style={styles.eventCard}
+              onPress={() => navigation.navigate('EventDetail', { event: ev })}
+            >
+              {catImg
+                ? <Image source={catImg} style={styles.eventThumb} resizeMode="cover" />
+                : <View style={[styles.eventThumb, { backgroundColor: catColor }]} />
+              }
+              <View style={styles.eventInfo}>
+                <Text style={styles.eventTitle} numberOfLines={1}>{ev.title}</Text>
+                <Text style={styles.eventMeta}>{ev.date}  ·  {ev.time}</Text>
+                <Text style={styles.eventMeta}>{ev.location} · {ev.municipality}</Text>
+              </View>
+              {isSaved(ev.id) && (
+                <View style={styles.savedBadge}>
+                  <Ionicons name="heart" size={14} color={C.pink} />
+                </View>
+              )}
+            </TouchableOpacity>
+          );
+        })}
 
         <View style={{ height: 20 }} />
       </ScrollView>
@@ -109,7 +176,7 @@ export default function FeedScreen({ navigation }: any) {
       <BottomNav
         active="home"
         onHome={() => {}}
-        onExplore={() => navigation.navigate('FeedFilter')}
+        onMap={() => navigation.navigate('MapScreen')}
         onMenu={() => navigation.navigate('Profile')}
       />
     </View>
@@ -123,20 +190,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 20, paddingTop: 52, paddingBottom: 16,
   },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.white, marginRight: 12 },
+  avatar: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: C.white, marginRight: 12,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  avatarText: { color: C.purple, fontFamily: 'Poppins_800ExtraBold', fontSize: 15 },
   headerCenter: { flex: 1 },
   greeting: { color: C.white, fontFamily: 'Poppins_800ExtraBold', fontSize: 15 },
   dateText: { color: 'rgba(255,255,255,0.7)', fontSize: 12 },
-  searchIcon: { width: 32, height: 32 },
   mainTitle: {
     color: C.white, fontSize: 26, fontFamily: 'Poppins_900Black',
     paddingHorizontal: 20, lineHeight: 34, marginBottom: 14,
   },
-  banner: {
-    backgroundColor: C.pink, marginHorizontal: 20,
-    borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginBottom: 16,
+  bannerWrap: {
+    marginHorizontal: 20, borderRadius: 10,
+    overflow: 'hidden', marginBottom: 16, height: 44,
   },
-  bannerText: { color: C.white, fontFamily: 'Poppins_900Black', fontSize: 20, letterSpacing: 2 },
+  bannerImg: { width: '100%', height: 44 },
   dayRow: { paddingHorizontal: 20, paddingBottom: 16, gap: 8 },
   dayBtn: {
     alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10,
@@ -156,18 +227,24 @@ const styles = StyleSheet.create({
     borderRadius: 18, padding: 14, marginBottom: 16,
   },
   mapCity: { color: C.pink, fontSize: 18, fontFamily: 'Poppins_900Black', marginBottom: 10 },
-  mapWrap: { height: 160, borderRadius: 14, overflow: 'hidden' },
-  map: { flex: 1 },
-  callout: { padding: 6, minWidth: 120 },
-  calloutTitle: { fontSize: 12, color: C.purple, fontFamily: 'Poppins_700Bold' },
-  calloutSub: { fontSize: 11, color: C.gray },
+  mapBg: {
+    borderRadius: 14, overflow: 'hidden',
+    backgroundColor: '#2d0080',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  mapFullBtn: {
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'flex-end', marginTop: 8,
+  },
+  mapFullBtnText: { color: C.purple, fontSize: 11, fontFamily: 'Poppins_600SemiBold' },
   eventCard: {
     flexDirection: 'row', backgroundColor: C.white,
     marginHorizontal: 20, borderRadius: 16, marginBottom: 12,
-    overflow: 'hidden', elevation: 2,
+    overflow: 'hidden', elevation: 2, alignItems: 'center',
   },
-  eventImageBox: { width: 90, height: 90, backgroundColor: C.purple + '30' },
+  eventThumb: { width: 90, height: 90 },
   eventInfo: { flex: 1, padding: 12 },
   eventTitle: { color: C.textDark, fontFamily: 'Poppins_800ExtraBold', fontSize: 13, marginBottom: 4 },
   eventMeta: { color: C.gray, fontSize: 11, marginBottom: 2 },
+  savedBadge: { paddingRight: 14 },
 });

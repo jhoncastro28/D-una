@@ -2,19 +2,30 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, StatusBar, Dimensions } from 'react-native';
 import { C } from '../../constants';
 import DunaLogo from '../../components/DunaLogo';
+import { useAuth } from '../../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
 export default function SplashScreen({ navigation }: any) {
   const progress = useRef(new Animated.Value(0)).current;
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     Animated.timing(progress, {
       toValue: 1,
       duration: 2300,
       useNativeDriver: false,
-    }).start(() => navigation.replace('Onboarding'));
-  }, []);
+    }).start(() => {
+      if (loading) return;
+      if (!user) {
+        navigation.replace('Onboarding');
+      } else if (user.role === 'admin') {
+        navigation.replace('AdminDashboard');
+      } else {
+        navigation.replace('Feed');
+      }
+    });
+  }, [loading, user]);
 
   const barWidth = progress.interpolate({
     inputRange: [0, 1],

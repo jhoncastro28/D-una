@@ -22,16 +22,12 @@ export default function AccountTypeScreen({ navigation }: any) {
         <Text style={styles.title}>¿Como quieres{'\n'}usar D'una?</Text>
         <Text style={styles.sub}>Elige el tipo de cuenta que mejor te describa</Text>
 
-        {/* Público */}
+        {/* Público → registro directo */}
         <TouchableOpacity
           style={styles.option}
-          onPress={() => navigation.navigate('Login', { role: 'publico' })}
+          onPress={() => navigation.navigate('RegisterPublic')}
         >
-          <Image
-            source={Icons.profilePublic}
-            style={styles.optIcon}
-            resizeMode="contain"
-          />
+          <Image source={Icons.profilePublic} style={styles.optIcon} resizeMode="contain" />
           <View style={styles.optInfo}>
             <Text style={styles.optTitle}>Público</Text>
             <Text style={styles.optDesc}>Descubre y asiste a eventos.</Text>
@@ -41,16 +37,12 @@ export default function AccountTypeScreen({ navigation }: any) {
           </View>
         </TouchableOpacity>
 
-        {/* Creador */}
+        {/* Creador → flujo de registro creador */}
         <TouchableOpacity
           style={styles.option}
           onPress={() => navigation.navigate('CreatorStep1')}
         >
-          <Image
-            source={Icons.profileCreator}
-            style={styles.optIcon}
-            resizeMode="contain"
-          />
+          <Image source={Icons.profileCreator} style={styles.optIcon} resizeMode="contain" />
           <View style={styles.optInfo}>
             <Text style={styles.optTitle}>Creador</Text>
             <Text style={styles.optDesc}>Organiza y publica tus eventos</Text>
@@ -59,6 +51,13 @@ export default function AccountTypeScreen({ navigation }: any) {
             <Text style={styles.arrowText}>›</Text>
           </View>
         </TouchableOpacity>
+
+        <View style={styles.loginRow}>
+          <Text style={styles.loginHint}>¿Ya tienes cuenta? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.loginLink}>Inicia sesión</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -66,12 +65,7 @@ export default function AccountTypeScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.purple },
-  top: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 48,
-  },
+  top: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 48 },
   back: { position: 'absolute', top: 52, left: 24 },
   backText: { color: C.white, fontSize: 28, fontFamily: 'Poppins_700Bold' },
   card: {
@@ -85,12 +79,9 @@ const styles = StyleSheet.create({
   title: { color: C.purple, fontSize: 24, fontFamily: 'Poppins_900Black', marginBottom: 6 },
   sub: { color: C.gray, fontSize: 13, marginBottom: 28 },
   option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: C.purple,
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 14,
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: C.purple, borderRadius: 20,
+    padding: 16, marginBottom: 14,
   },
   optIcon: { width: 52, height: 52, marginRight: 14 },
   optInfo: { flex: 1 },
@@ -101,4 +92,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.white, alignItems: 'center', justifyContent: 'center',
   },
   arrowText: { color: C.purple, fontSize: 22, fontFamily: 'Poppins_700Bold' },
+  loginRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 16 },
+  loginHint: { color: C.gray, fontSize: 13 },
+  loginLink: { color: C.purple, fontSize: 13, fontFamily: 'Poppins_700Bold', textDecorationLine: 'underline' },
 });

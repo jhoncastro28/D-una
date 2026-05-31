@@ -76,6 +76,14 @@ export const WEEK_DAYS = [
   { day: 'SÁB', num: 11 },
 ];
 
+// Vista amplia de Colombia (para pantalla de selección de municipio)
+export const COLOMBIA_REGION = {
+  latitude: 4.5709,
+  longitude: -74.2973,
+  latitudeDelta: 11.0,
+  longitudeDelta: 11.0,
+};
+
 // Coordenadas reales del departamento de Boyacá
 export const BOYACA_REGION = {
   latitude: 5.4545,

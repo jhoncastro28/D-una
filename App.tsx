@@ -11,6 +11,7 @@ import {
   Poppins_900Black,
 } from '@expo-google-fonts/poppins';
 import AppNavigator from './src/navigation/AppNavigator';
+import { AuthProvider } from './src/context/AuthContext';
 import { C } from './src/constants';
 
 // Poppins como fuente base para todos los Text de la app
@@ -38,9 +39,9 @@ export default function App() {
   }
 
   return (
-    <>
+    <AuthProvider>
       <StatusBar style="light" />
       <AppNavigator />
-    </>
+    </AuthProvider>
   );
 }

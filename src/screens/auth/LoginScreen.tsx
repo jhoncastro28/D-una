@@ -1,17 +1,53 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, StatusBar,
-  Dimensions, ScrollView, TextInput, KeyboardAvoidingView, Platform,
+  Dimensions, ScrollView, TextInput, KeyboardAvoidingView,
+  Platform, ActivityIndicator, Alert,
 } from 'react-native';
-import { AntDesign, FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { C } from '../../constants';
 import DunaLogo from '../../components/DunaLogo';
+import { useAuth } from '../../context/AuthContext';
 
 const { height } = Dimensions.get('window');
 
 export default function LoginScreen({ navigation }: any) {
-  const [email, setEmail] = useState('');
+  const { login } = useAuth();
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading]   = useState(false);
+
+  const handleLogin = async () => {
+    if (!email.trim() || !password) {
+      Alert.alert('Campos requeridos', 'Por favor ingresa tu correo y contraseña.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await login(email.trim(), password);
+      if (result.role === 'admin') {
+        navigation.replace('AdminDashboard');
+      } else if (result.role === 'creador') {
+        navigation.replace('Feed');
+      } else {
+        navigation.replace('Feed');
+      }
+    } catch (err: any) {
+      if (err.message === 'PENDING') {
+        navigation.replace('RegistrationPending');
+      } else if (err.message === 'REJECTED') {
+        navigation.replace('AccountRejected');
+      } else {
+        Alert.alert(
+          'Credenciales incorrectas',
+          'El correo o contraseña no son válidos. Verifica tus datos.',
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -20,7 +56,6 @@ export default function LoginScreen({ navigation }: any) {
     >
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
 
-      {/* Cabecera morada con logo */}
       <View style={styles.top}>
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
           <Text style={styles.backText}>{'<'}</Text>
@@ -28,7 +63,6 @@ export default function LoginScreen({ navigation }: any) {
         <DunaLogo size="large" showTagline />
       </View>
 
-      {/* Tarjeta blanca */}
       <ScrollView
         contentContainerStyle={styles.card}
         keyboardShouldPersistTaps="handled"
@@ -36,7 +70,6 @@ export default function LoginScreen({ navigation }: any) {
       >
         <Text style={styles.title}>Inicia sesión</Text>
 
-        {/* Email */}
         <Text style={styles.label}>Correo electrónico</Text>
         <TextInput
           style={styles.input}
@@ -46,43 +79,53 @@ export default function LoginScreen({ navigation }: any) {
           placeholderTextColor="rgba(110,16,247,0.4)"
           keyboardType="email-address"
           autoCapitalize="none"
+          autoCorrect={false}
         />
 
-        {/* Password */}
         <Text style={styles.label}>Contraseña</Text>
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="••••••••"
-          placeholderTextColor="rgba(110,16,247,0.4)"
-          secureTextEntry
-        />
+        <View style={styles.passWrap}>
+          <TextInput
+            style={[styles.input, { flex: 1, marginBottom: 0 }]}
+            value={password}
+            onChangeText={setPassword}
+            placeholder="••••••••"
+            placeholderTextColor="rgba(110,16,247,0.4)"
+            secureTextEntry={!showPass}
+          />
+          <TouchableOpacity onPress={() => setShowPass(p => !p)} style={styles.eyeBtn}>
+            <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={20} color={C.gray} />
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity style={styles.forgot}>
           <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
         </TouchableOpacity>
 
-        {/* Redes sociales — visual */}
         <View style={styles.socialRow}>
-          <SocialBtn>
-            <AntDesign name="google" size={22} color="#DB4437" />
-          </SocialBtn>
-          <SocialBtn>
-            <AntDesign name="apple-o" size={22} color="#000" />
-          </SocialBtn>
-          <SocialBtn>
-            <FontAwesome name="facebook" size={22} color="#1877F2" />
-          </SocialBtn>
+          <SocialBtn><Ionicons name="logo-google"   size={22} color="#DB4437" /></SocialBtn>
+          <SocialBtn><Ionicons name="logo-apple"    size={24} color="#000" /></SocialBtn>
+          <SocialBtn><Ionicons name="logo-facebook" size={22} color="#1877F2" /></SocialBtn>
         </View>
 
         <TouchableOpacity
-          style={styles.nextRow}
-          onPress={() => navigation.navigate('Location')}
+          style={[styles.loginBtn, loading && { opacity: 0.7 }]}
+          onPress={handleLogin}
+          disabled={loading}
         >
-          <Text style={styles.nextText}>Siguiente</Text>
-          <Text style={styles.nextArrow}> ›</Text>
+          {loading
+            ? <ActivityIndicator color={C.white} />
+            : <Text style={styles.loginBtnText}>Siguiente ›</Text>
+          }
         </TouchableOpacity>
+
+        <View style={styles.registerRow}>
+          <Text style={styles.registerHint}>¿No tienes cuenta? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('AccountType')}>
+            <Text style={styles.registerLink}>Regístrate</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.adminHint}>Admin: admin@duna.com / admin123</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -94,7 +137,7 @@ function SocialBtn({ children }: { children: React.ReactNode }) {
 
 const styles = StyleSheet.create({
   top: {
-    height: height * 0.42,
+    height: height * 0.38,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -117,12 +160,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: 'center',
   },
-  label: {
-    color: C.textDark,
-    fontSize: 13,
-    fontFamily: 'Poppins_600SemiBold',
-    marginBottom: 7,
-  },
+  label: { color: C.textDark, fontSize: 13, fontFamily: 'Poppins_600SemiBold', marginBottom: 7 },
   input: {
     borderWidth: 1.5,
     borderColor: C.pink,
@@ -135,10 +173,21 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_400Regular',
     backgroundColor: C.white,
   },
-  forgot: { alignSelf: 'flex-end', marginBottom: 24, marginTop: -6 },
+  passWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: C.pink,
+    borderRadius: 30,
+    paddingRight: 14,
+    marginBottom: 16,
+    backgroundColor: C.white,
+  },
+  eyeBtn: { padding: 6 },
+  forgot: { alignSelf: 'flex-end', marginBottom: 24, marginTop: -4 },
   forgotText: { color: C.purple, fontSize: 13, fontFamily: 'Poppins_600SemiBold' },
 
-  socialRow: { flexDirection: 'row', justifyContent: 'center', gap: 18, marginBottom: 32 },
+  socialRow: { flexDirection: 'row', justifyContent: 'center', gap: 18, marginBottom: 28 },
   social: {
     width: 52, height: 52, borderRadius: 26,
     borderWidth: 1.5, borderColor: '#e0e0e0',
@@ -149,7 +198,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08, shadowRadius: 3,
   },
 
-  nextRow: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' },
-  nextText: { color: C.purple, fontSize: 17, fontFamily: 'Poppins_800ExtraBold' },
-  nextArrow: { color: C.purple, fontSize: 28, fontFamily: 'Poppins_700Bold' },
+  loginBtn: {
+    backgroundColor: C.purple,
+    borderRadius: 30,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  loginBtnText: { color: C.white, fontSize: 16, fontFamily: 'Poppins_800ExtraBold' },
+
+  registerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  registerHint: { color: C.gray, fontSize: 13 },
+  registerLink: { color: C.purple, fontSize: 13, fontFamily: 'Poppins_700Bold', textDecorationLine: 'underline' },
+
+  adminHint: { color: C.gray, fontSize: 10, textAlign: 'center', opacity: 0.5 },
 });

@@ -5,21 +5,9 @@ import {
 import { C } from '../../constants';
 
 const ITEMS = [
-  {
-    id: 'normas',
-    text: 'Acepto las normas de la comunidad de D\'una',
-    link: 'Ver normas',
-  },
-  {
-    id: 'reembolso',
-    text: 'Tengo políticas de reembolso o cancelación claras.',
-    link: '',
-  },
-  {
-    id: 'seguridad',
-    text: 'Garantizo la seguridad básica de los asistentes en mis eventos',
-    link: '',
-  },
+  { id: 'normas',    text: "Acepto las normas de la comunidad de D'una",        link: 'Ver normas' },
+  { id: 'reembolso', text: 'Tengo políticas de reembolso o cancelación claras.', link: '' },
+  { id: 'seguridad', text: 'Garantizo la seguridad básica de los asistentes en mis eventos', link: '' },
 ];
 
 export default function CreatorStep3Screen({ navigation }: any) {
@@ -36,6 +24,7 @@ export default function CreatorStep3Screen({ navigation }: any) {
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
           <Text style={styles.backText}>{'<'}</Text>
         </TouchableOpacity>
+        <Text style={styles.stepLabel}>Paso 3 de 4</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.card}>
@@ -72,33 +61,28 @@ export default function CreatorStep3Screen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.purple },
-  purpleTop: { height: 90 },
+  purpleTop: { height: 90, justifyContent: 'flex-end', paddingBottom: 10, paddingHorizontal: 24 },
   back: { position: 'absolute', top: 52, left: 24 },
   backText: { color: C.white, fontSize: 28, fontFamily: 'Poppins_700Bold' },
+  stepLabel: {
+    color: 'rgba(255,255,255,0.6)', fontSize: 12,
+    textAlign: 'right', fontFamily: 'Poppins_600SemiBold',
+  },
   card: {
-    backgroundColor: C.white,
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
-    paddingHorizontal: 28,
-    paddingTop: 32,
-    paddingBottom: 50,
+    backgroundColor: C.white, borderTopLeftRadius: 36, borderTopRightRadius: 36,
+    paddingHorizontal: 28, paddingTop: 32, paddingBottom: 50,
   },
   title: { color: C.purple, fontSize: 22, fontFamily: 'Poppins_900Black', marginBottom: 6 },
   sub: { color: C.gray, fontSize: 13, marginBottom: 24 },
   item: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: C.purple,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    flexDirection: 'row', alignItems: 'flex-start',
+    backgroundColor: C.purple, borderRadius: 16, padding: 16, marginBottom: 12,
   },
   itemActive: { backgroundColor: C.purple },
   checkbox: {
     width: 22, height: 22, borderRadius: 6, borderWidth: 2,
     borderColor: C.white, marginRight: 14, marginTop: 1,
-    alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'transparent',
+    alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent',
   },
   checkboxActive: { backgroundColor: C.pink, borderColor: C.pink },
   checkIcon: { color: C.white, fontSize: 12, fontFamily: 'Poppins_900Black' },

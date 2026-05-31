@@ -1,19 +1,21 @@
 import React from 'react';
-import { View, TouchableOpacity, Image, StyleSheet, Text } from 'react-native';
+import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { C } from '../constants';
 import { Icons } from '../constants/icons';
 
 interface Props {
-  active: 'home' | 'explore' | 'menu';
+  active: 'home' | 'map' | 'menu';
   onHome: () => void;
-  onExplore: () => void;
+  onMap: () => void;
   onMenu: () => void;
 }
 
-export default function BottomNav({ active, onHome, onExplore, onMenu }: Props) {
+export default function BottomNav({ active, onHome, onMap, onMenu }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.pill}>
+        {/* Home */}
         <TouchableOpacity style={styles.btn} onPress={onHome}>
           <Image
             source={Icons.home}
@@ -22,20 +24,25 @@ export default function BottomNav({ active, onHome, onExplore, onMenu }: Props) 
           />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.btn} onPress={onExplore}>
-          <View style={[styles.arrowIcon, active === 'explore' && styles.arrowActive]}>
-            <Text style={[styles.arrowText, active === 'explore' && styles.arrowTextActive]}>▷</Text>
+        {/* Map — navigate icon */}
+        <TouchableOpacity style={styles.btn} onPress={onMap}>
+          <View style={[styles.mapCircle, active === 'map' && styles.mapCircleActive]}>
+            <Ionicons
+              name="navigate"
+              size={19}
+              color={active === 'map' ? C.white : C.purple}
+            />
           </View>
         </TouchableOpacity>
 
+        {/* Menu / Perfil */}
         <TouchableOpacity style={styles.btn} onPress={onMenu}>
-          <View style={styles.menuIcon}>
-            {[0, 1, 2].map(i => (
-              <View
-                key={i}
-                style={[styles.menuLine, active === 'menu' ? styles.menuLineActive : styles.menuLineInactive]}
-              />
-            ))}
+          <View style={[styles.avatarCircle, active === 'menu' && styles.avatarActive]}>
+            <Ionicons
+              name="person"
+              size={18}
+              color={active === 'menu' ? C.white : C.purple}
+            />
           </View>
         </TouchableOpacity>
       </View>
@@ -62,17 +69,23 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
-    gap: 32,
+    gap: 28,
   },
   btn: { alignItems: 'center', justifyContent: 'center', padding: 4 },
   icon: { width: 30, height: 30 },
   iconInactive: { opacity: 0.35 },
-  arrowIcon: { padding: 4 },
-  arrowActive: {},
-  arrowText: { fontSize: 22, color: 'rgba(110,16,247,0.3)' },
-  arrowTextActive: { color: C.pink },
-  menuIcon: { gap: 4, padding: 4 },
-  menuLine: { width: 24, height: 3, borderRadius: 2 },
-  menuLineActive: { backgroundColor: C.pink },
-  menuLineInactive: { backgroundColor: 'rgba(110,16,247,0.3)' },
+
+  mapCircle: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: C.grayLight,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  mapCircleActive: { backgroundColor: C.pink },
+
+  avatarCircle: {
+    width: 38, height: 38, borderRadius: 19,
+    backgroundColor: C.grayLight,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  avatarActive: { backgroundColor: C.purple },
 });

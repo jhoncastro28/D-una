@@ -4,13 +4,23 @@ import {
   ScrollView, TextInput, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { C, ORG_TYPES, BOYACA_MUNICIPALITIES } from '../../constants';
+import { useAuth } from '../../context/AuthContext';
 
 export default function CreatorStep1Screen({ navigation }: any) {
-  const [name, setName] = useState('');
-  const [brand, setBrand] = useState('');
+  const { updateCreatorFormData } = useAuth();
+
+  const [email, setEmail]           = useState('');
+  const [password, setPassword]     = useState('');
+  const [name, setName]             = useState('');
+  const [brand, setBrand]           = useState('');
   const [municipality, setMunicipality] = useState('');
-  const [orgType, setOrgType] = useState<string[]>([]);
-  const [openMuni, setOpenMuni] = useState(false);
+  const [orgType, setOrgType]       = useState<string[]>([]);
+  const [openMuni, setOpenMuni]     = useState(false);
+
+  const handleNext = () => {
+    updateCreatorFormData({ email, password, name, brand, municipality, orgTypes: orgType });
+    navigation.navigate('CreatorStep2');
+  };
 
   return (
     <KeyboardAvoidingView
@@ -23,11 +33,21 @@ export default function CreatorStep1Screen({ navigation }: any) {
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
           <Text style={styles.backText}>{'<'}</Text>
         </TouchableOpacity>
+        <Text style={styles.stepLabel}>Paso 1 de 4</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.card} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Información básica{'\n'}de creador</Text>
         <Text style={styles.sub}>Cuéntanos quién eres.</Text>
+
+        <Label>Correo electrónico</Label>
+        <Field value={email} onChange={setEmail} placeholder="tu@correo.com"
+          keyboardType="email-address" autoCapitalize="none" />
+
+        <Label>Contraseña</Label>
+        <Field value={password} onChange={setPassword} placeholder="Mínimo 6 caracteres" secureTextEntry />
+
+        <View style={styles.divider} />
 
         <Label>Nombre Completo</Label>
         <Field value={name} onChange={setName} placeholder="Ej: Nicolás Parra" />
@@ -44,7 +64,7 @@ export default function CreatorStep1Screen({ navigation }: any) {
         </TouchableOpacity>
         {openMuni && (
           <View style={styles.dropdown}>
-            <ScrollView style={{ maxHeight: 180 }}>
+            <ScrollView style={{ maxHeight: 180 }} nestedScrollEnabled>
               {BOYACA_MUNICIPALITIES.map(m => (
                 <TouchableOpacity
                   key={m}
@@ -71,10 +91,7 @@ export default function CreatorStep1Screen({ navigation }: any) {
           ))}
         </View>
 
-        <TouchableOpacity
-          style={styles.nextRow}
-          onPress={() => navigation.navigate('CreatorStep2')}
-        >
+        <TouchableOpacity style={styles.nextRow} onPress={handleNext}>
           <Text style={styles.nextText}>Siguiente</Text>
           <Text style={styles.nextArrow}> ›</Text>
         </TouchableOpacity>
@@ -83,10 +100,10 @@ export default function CreatorStep1Screen({ navigation }: any) {
   );
 }
 
-function Label({ children }: any) {
+function Label({ children }: { children: React.ReactNode }) {
   return <Text style={styles.label}>{children}</Text>;
 }
-function Field({ value, onChange, placeholder }: any) {
+function Field({ value, onChange, placeholder, keyboardType, autoCapitalize, secureTextEntry }: any) {
   return (
     <TextInput
       style={styles.input}
@@ -94,25 +111,30 @@ function Field({ value, onChange, placeholder }: any) {
       onChangeText={onChange}
       placeholder={placeholder}
       placeholderTextColor="rgba(110,16,247,0.35)"
+      keyboardType={keyboardType}
+      autoCapitalize={autoCapitalize}
+      secureTextEntry={secureTextEntry}
+      autoCorrect={false}
     />
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.purple },
-  purpleTop: { height: 90 },
+  purpleTop: { height: 90, justifyContent: 'flex-end', paddingBottom: 10, paddingHorizontal: 24 },
   back: { position: 'absolute', top: 52, left: 24 },
   backText: { color: C.white, fontSize: 28, fontFamily: 'Poppins_700Bold' },
+  stepLabel: {
+    color: 'rgba(255,255,255,0.6)', fontSize: 12,
+    textAlign: 'right', fontFamily: 'Poppins_600SemiBold',
+  },
   card: {
-    backgroundColor: C.white,
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
-    paddingHorizontal: 28,
-    paddingTop: 32,
-    paddingBottom: 50,
+    backgroundColor: C.white, borderTopLeftRadius: 36, borderTopRightRadius: 36,
+    paddingHorizontal: 28, paddingTop: 32, paddingBottom: 50,
   },
   title: { color: C.purple, fontSize: 22, fontFamily: 'Poppins_900Black', marginBottom: 6 },
   sub: { color: C.gray, fontSize: 13, marginBottom: 22 },
+  divider: { height: 1, backgroundColor: '#f0f0f0', marginVertical: 16 },
   label: { color: C.textDark, fontSize: 13, fontFamily: 'Poppins_600SemiBold', marginBottom: 8 },
   input: {
     borderWidth: 1.5, borderColor: C.pink, borderRadius: 30,

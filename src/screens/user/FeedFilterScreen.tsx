@@ -1,24 +1,34 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, StatusBar,
-  ScrollView, TextInput,
+  ScrollView,
 } from 'react-native';
-import { C, BOYACA_MUNICIPALITIES } from '../../constants';
+import { Ionicons } from '@expo/vector-icons';
+import { C, BOYACA_MUNICIPALITIES, CREATOR_CATEGORIES } from '../../constants';
 import { MOCK_EVENTS } from '../../constants/mockData';
 import BottomNav from '../../components/BottomNav';
+import { useAuth } from '../../context/AuthContext';
 
 const THUMB_COLORS = [C.teal, C.pink, C.purple + 'AA', C.teal + 'BB', C.pink + 'BB', C.purple + '77'];
 
 export default function FeedFilterScreen({ navigation }: any) {
+  const { user } = useAuth();
   const [municipality, setMunicipality] = useState('');
-  const [category, setCategory] = useState('');
-  const [openMuni, setOpenMuni] = useState(false);
+  const [category, setCategory]         = useState('');
+  const [openMuni, setOpenMuni]         = useState(false);
+  const [openCat, setOpenCat]           = useState(false);
+
+  const initials = user
+    ? user.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+    : '?';
 
   const filtered = MOCK_EVENTS.filter(ev => {
     const matchM = !municipality || ev.municipality === municipality;
-    const matchC = !category || ev.category.includes(category.toLowerCase());
+    const matchC = !category || ev.category === category;
     return matchM && matchC;
   });
+
+  const selectedCatLabel = CREATOR_CATEGORIES.find(c => c.id === category)?.label ?? 'Categoría';
 
   return (
     <View style={styles.container}>
@@ -26,24 +36,27 @@ export default function FeedFilterScreen({ navigation }: any) {
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-          <View style={styles.avatar} />
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initials}</Text>
+          </View>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Filtro de Feed</Text>
       </View>
 
       {/* Filtros */}
       <View style={styles.filters}>
-        <TouchableOpacity style={styles.filterInput} onPress={() => setOpenMuni(!openMuni)}>
+        {/* Municipio */}
+        <TouchableOpacity style={styles.filterBtn} onPress={() => { setOpenMuni(o => !o); setOpenCat(false); }}>
           <Text style={[styles.filterText, !municipality && styles.filterPlaceholder]}>
             {municipality || 'Municipio'}
           </Text>
+          <Ionicons name={openMuni ? 'chevron-up' : 'chevron-down'} size={18} color={C.purple} />
         </TouchableOpacity>
-
         {openMuni && (
           <View style={styles.dropdown}>
-            <ScrollView style={{ maxHeight: 160 }}>
+            <ScrollView style={{ maxHeight: 160 }} nestedScrollEnabled>
               <TouchableOpacity style={styles.dropItem} onPress={() => { setMunicipality(''); setOpenMuni(false); }}>
-                <Text style={styles.dropText}>Todos los municipios</Text>
+                <Text style={[styles.dropText, !municipality && styles.dropActive]}>Todos los municipios</Text>
               </TouchableOpacity>
               {BOYACA_MUNICIPALITIES.map(m => (
                 <TouchableOpacity
@@ -58,14 +71,31 @@ export default function FeedFilterScreen({ navigation }: any) {
           </View>
         )}
 
-        <TextInput
-          style={styles.filterInput}
-          value={category}
-          onChangeText={setCategory}
-          placeholder="Categoría"
-          placeholderTextColor="rgba(110,16,247,0.45)"
-          returnKeyType="search"
-        />
+        {/* Categoría */}
+        <TouchableOpacity style={styles.filterBtn} onPress={() => { setOpenCat(o => !o); setOpenMuni(false); }}>
+          <Text style={[styles.filterText, !category && styles.filterPlaceholder]}>
+            {category ? selectedCatLabel : 'Categoría'}
+          </Text>
+          <Ionicons name={openCat ? 'chevron-up' : 'chevron-down'} size={18} color={C.purple} />
+        </TouchableOpacity>
+        {openCat && (
+          <View style={styles.dropdown}>
+            <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
+              <TouchableOpacity style={styles.dropItem} onPress={() => { setCategory(''); setOpenCat(false); }}>
+                <Text style={[styles.dropText, !category && styles.dropActive]}>Todas las categorías</Text>
+              </TouchableOpacity>
+              {CREATOR_CATEGORIES.map(cat => (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={styles.dropItem}
+                  onPress={() => { setCategory(cat.id); setOpenCat(false); }}
+                >
+                  <Text style={[styles.dropText, category === cat.id && styles.dropActive]}>{cat.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
       </View>
 
       {/* Lista */}
@@ -91,9 +121,9 @@ export default function FeedFilterScreen({ navigation }: any) {
       </ScrollView>
 
       <BottomNav
-        active="explore"
+        active="home"
         onHome={() => navigation.navigate('Feed')}
-        onExplore={() => {}}
+        onMap={() => navigation.navigate('MapScreen')}
         onMenu={() => navigation.navigate('Profile')}
       />
     </View>
@@ -106,18 +136,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 20, paddingTop: 52, paddingBottom: 18,
   },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.white, marginRight: 14 },
+  avatar: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: C.white, marginRight: 14,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  avatarText: { color: C.purple, fontFamily: 'Poppins_800ExtraBold', fontSize: 15 },
   headerTitle: { color: C.white, fontFamily: 'Poppins_800ExtraBold', fontSize: 18 },
   filters: { paddingHorizontal: 20, marginBottom: 6 },
-  filterInput: {
+  filterBtn: {
     backgroundColor: C.white,
     borderWidth: 2, borderColor: C.pink,
     borderRadius: 30,
     paddingHorizontal: 20, paddingVertical: 13,
     marginBottom: 10,
-    fontSize: 15,
-    color: C.textDark,
-    fontFamily: 'Poppins_400Regular',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   filterText: { fontSize: 15, color: C.textDark, fontFamily: 'Poppins_400Regular' },
   filterPlaceholder: { color: 'rgba(110,16,247,0.45)' },
