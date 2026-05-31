@@ -6,11 +6,17 @@ Plataforma móvil para descubrir y publicar eventos culturales en Boyacá, Colom
 
 ## Tecnología
 
-- **React Native** con Expo SDK 52
-- **Expo Go** para pruebas en dispositivo físico (sin necesidad de compilar)
-- **React Navigation** para el manejo de pantallas
-- **Poppins** como tipografía principal
-- Compatible con Android e iOS
+| Librería | Versión | Uso |
+|---|---|---|
+| React Native + Expo | SDK 54 | Base de la app |
+| React Navigation (Stack) | v7 | Manejo de pantallas |
+| react-native-svg | 15.12.1 | Mapa SVG de Boyacá |
+| react-native-maps | 1.20.1 | Mapa completo con eventos |
+| AsyncStorage | 2.2.0 | Persistencia local de sesión |
+| @expo/vector-icons (Ionicons) | v15 | Íconos de UI |
+| Poppins (expo-google-fonts) | — | Tipografía principal |
+
+Compatible con Android e iOS.
 
 ---
 
@@ -18,41 +24,83 @@ Plataforma móvil para descubrir y publicar eventos culturales en Boyacá, Colom
 
 - Node.js 18 o superior
 - npm 9 o superior
-- La app **Expo Go** instalada en el celular (disponible en Play Store y App Store)
-- El celular y el computador deben estar en la **misma red Wi-Fi**
+- App **Expo Go** instalada en el celular (Play Store / App Store)
+- Celular y computador en la **misma red Wi-Fi**
 
 ---
 
-## Instalación
+## Instalación y ejecución
 
 ```bash
 # Dentro de la carpeta D-una
 npm install --legacy-peer-deps
-```
 
-## Ejecutar
-
-```bash
 npx expo start
 ```
 
-Escanea el código QR con Expo Go (Android) o con la cámara del iPhone. La app abre automáticamente.
+Escanea el código QR con Expo Go (Android) o con la cámara del iPhone.
+
+---
+
+## Cuentas de prueba
+
+| Rol | Cómo acceder |
+|---|---|
+| **Admin** | Email: `admin@duna.com` / Contraseña: `admin123` |
+| **Público** | Registrarse desde Onboarding → Crear cuenta → Público |
+| **Creador** | Registrarse desde Onboarding → Crear cuenta → Creador (requiere aprobación del admin) |
 
 ---
 
 ## Flujos de la aplicación
 
+### Inicio (sesión persistente)
+
+Al abrir la app el Splash detecta si hay sesión activa:
+- Sin sesión → Onboarding
+- Sesión pública o creador aprobado → Feed
+- Sesión admin → Panel de administración
+
 ### Usuario público
 
-Splash -> Onboarding -> Login -> Selección de municipio -> Feed principal
+```
+Onboarding → Inicia sesión  →  Feed
+           → Crear cuenta  →  RegisterPublic (nombre, email, contraseña, municipio) → Feed
+```
 
-Desde el feed puedes explorar eventos por fecha, ver el mapa de Tunja con los eventos marcados, filtrar por municipio o categoría, y ver el detalle de cada evento.
+Desde el feed puede explorar eventos por fecha, ver el mapa SVG de su municipio con los eventos marcados, filtrar por municipio y categoría, y guardar eventos favoritos con "Me interesa".
 
 ### Registro como Creador
 
-Onboarding -> "Regístrate" -> Tipo de cuenta -> Información básica -> Tipos de eventos -> Confianza y seguridad -> Datos de contacto -> Confirmación
+```
+Onboarding → Crear cuenta → Creador →
+  Paso 1: Email, contraseña, nombre, marca, municipio, tipo de organizador
+  Paso 2: Categorías de eventos que organiza
+  Paso 3: Aceptación de normas y seguridad
+  Paso 4: Datos de contacto → Enviar solicitud → Pantalla "Registro recibido"
+```
 
-El registro de creadores requiere nombre, nombre de marca o proyecto, municipio dentro de Boyacá y tipo de organizador. Al enviar, la cuenta queda en revisión.
+La cuenta queda en estado **pendiente** hasta que el admin la apruebe. El creador puede iniciar sesión con sus credenciales; mientras esté pendiente verá la pantalla de espera.
+
+### Panel de administrador
+
+```
+Login (admin@duna.com / admin123) → AdminDashboard
+```
+
+- Lista todas las solicitudes de creadores
+- Filtro por estado: Todos / Pendientes / Aprobados / Rechazados
+- Botones para Aprobar o Rechazar cada solicitud
+- Al aprobar se crea automáticamente la cuenta con rol `creador`
+- Pull-to-refresh para recargar solicitudes
+
+### Navegación principal (BottomNav)
+
+| Botón | Ícono | Destino |
+|---|---|---|
+| Izquierdo | Casa | Feed |
+| Centro | Triángulo (navegar) | MapScreen (Google Maps) |
+| Derecho | Persona | Perfil |
 
 ---
 
@@ -61,26 +109,79 @@ El registro de creadores requiere nombre, nombre de marca o proyecto, municipio 
 ```
 D-una/
 ├── src/
-│   ├── components/       Componentes reutilizables (logo, navbar, inputs)
-│   ├── constants/        Colores, fuentes, íconos, datos mock
-│   ├── navigation/       Configuración de rutas
+│   ├── components/
+│   │   ├── BottomNav.tsx        Barra de navegación inferior
+│   │   ├── BoyacaMapSVG.tsx     Mapa SVG del departamento de Boyacá
+│   │   ├── DunaLogo.tsx         Logo reutilizable (3 tamaños)
+│   │   └── PurpleInput.tsx      Input para fondos morados
+│   ├── constants/
+│   │   ├── colors.ts            Paleta de colores (C)
+│   │   ├── fonts.ts             Familias Poppins (F)
+│   │   ├── icons.ts             Imports de assets (íconos + patrones)
+│   │   ├── index.ts             Municipios, categorías, tipos de org
+│   │   └── mockData.ts          6 eventos de ejemplo con coordenadas reales
+│   ├── context/
+│   │   └── AuthContext.tsx      Sesiones, registro, favoritos, aprobación creadores
+│   ├── navigation/
+│   │   └── AppNavigator.tsx     Stack Navigator con todas las rutas
 │   └── screens/
-│       ├── auth/         Splash, Onboarding, Login, Ubicación, Loading, Tipo de cuenta
-│       ├── user/         Feed, Detalle de evento, Filtros
-│       └── creator/      Pasos de registro, Pendiente, Aprobado, Rechazado
+│       ├── admin/
+│       │   └── AdminDashboardScreen.tsx
+│       ├── auth/
+│       │   ├── SplashScreen.tsx
+│       │   ├── OnboardingScreen.tsx
+│       │   ├── LoginScreen.tsx
+│       │   ├── RegisterPublicScreen.tsx
+│       │   ├── AccountTypeScreen.tsx
+│       │   ├── LocationScreen.tsx
+│       │   └── LoadingScreen.tsx
+│       ├── user/
+│       │   ├── FeedScreen.tsx
+│       │   ├── MapScreen.tsx
+│       │   ├── EventDetailScreen.tsx
+│       │   ├── FeedFilterScreen.tsx
+│       │   └── ProfileScreen.tsx
+│       └── creator/
+│           ├── CreatorStep1Screen.tsx   Email, contraseña, info básica
+│           ├── CreatorStep2Screen.tsx   Categorías (grid SVG)
+│           ├── CreatorStep3Screen.tsx   Confianza y seguridad
+│           ├── CreatorStep4Screen.tsx   Contacto + enviar solicitud
+│           ├── RegistrationPendingScreen.tsx
+│           ├── AccountApprovedScreen.tsx
+│           └── AccountRejectedScreen.tsx
 ├── assets/
-│   └── flat/             Íconos y logos en rutas limpias (sin tildes ni espacios)
-└── App.tsx
+│   ├── flat/                    Íconos PNG (categorías, perfiles, UI)
+│   ├── patron_purple.png        Fondo morado con patrón D'una
+│   ├── patron_white.png         Fondo blanco con patrón D'una
+│   └── patron_banner.png        Banner rosa horizontal "D'una"
+└── App.tsx                      Raíz: carga fuentes + AuthProvider
 ```
 
 ---
 
 ## Paleta de colores
 
-| Nombre   | Valor     |
-|----------|-----------|
-| Morado   | `#6e10f7` |
-| Teal     | `#3ad4cc` |
-| Rosa     | `#ff007c` |
+| Token | Valor | Uso |
+|---|---|---|
+| `C.purple` | `#6e10f7` | Color principal, fondos, botones |
+| `C.pink` | `#ff007c` | Acentos, CTAs, mapa SVG |
+| `C.teal` | `#3ad4cc` | Confirmaciones, aprobaciones |
+| `C.white` | `#FFFFFF` | Tarjetas, textos sobre morado |
+| `C.textDark` | `#1a1a2e` | Textos sobre fondo blanco |
+| `C.patternBg` | `#f0e8ff` | Fondo de pantallas de confirmación |
+
+---
+
+## Datos locales
+
+Todo corre de forma local. No hay backend externo. Los datos se almacenan en:
+
+| Clave AsyncStorage | Contenido |
+|---|---|
+| `@duna_session` | ID y rol del usuario activo |
+| `@duna_users` | Base de datos de usuarios (email, contraseña, rol, municipio, favoritos) |
+| `@duna_creator_registrations` | Solicitudes de creadores con estado pending/approved/rejected |
+
+Para agregar eventos reales, edita `src/constants/mockData.ts`. Cada evento admite `title`, `category`, `date`, `time`, `location`, `municipality`, `description`, y coordenadas `lat`/`lng`.
 
 ---
