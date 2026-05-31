@@ -69,7 +69,7 @@ export default function LoginScreen({ navigation }: any) {
             <AntDesign name="google" size={22} color="#DB4437" />
           </SocialBtn>
           <SocialBtn>
-            <AntDesign name="apple1" size={22} color="#000" />
+            <AntDesign name="apple-o" size={22} color="#000" />
           </SocialBtn>
           <SocialBtn>
             <FontAwesome name="facebook" size={22} color="#1877F2" />
