@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, StatusBar,
-  Image, Dimensions, ScrollView,
+  ScrollView, Dimensions,
 } from 'react-native';
+import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 import { C, BOYACA_MUNICIPALITIES } from '../../constants';
-import { Icons } from '../../constants/icons';
+import { BOYACA_REGION, MOCK_EVENTS } from '../../constants/mockData';
 import DunaLogo from '../../components/DunaLogo';
 
-const { height, width } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 export default function LocationScreen({ navigation }: any) {
   const [municipality, setMunicipality] = useState('');
@@ -17,26 +18,35 @@ export default function LocationScreen({ navigation }: any) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
 
-      {/* Purple top */}
       <View style={styles.top}>
         <DunaLogo size="large" />
       </View>
 
-      {/* White card */}
       <View style={styles.card}>
         <Text style={styles.question}>¿En qué municipio te encuentras?</Text>
 
-        {/* Mapa Boyacá simulado */}
-        <View style={styles.mapArea}>
-          <Image
-            source={Icons.location}
-            style={styles.pin}
-            resizeMode="contain"
-          />
-          <View style={styles.boyacaShape} />
+        {/* Mapa real de Boyacá */}
+        <View style={styles.mapWrap}>
+          <MapView
+            provider={PROVIDER_DEFAULT}
+            style={styles.map}
+            initialRegion={BOYACA_REGION}
+            scrollEnabled={false}
+            zoomEnabled={false}
+            rotateEnabled={false}
+            pitchEnabled={false}
+          >
+            {MOCK_EVENTS.map(ev => (
+              <Marker
+                key={ev.id}
+                coordinate={{ latitude: ev.lat, longitude: ev.lng }}
+                pinColor={C.pink}
+              />
+            ))}
+          </MapView>
         </View>
 
-        {/* Picker */}
+        {/* Selector de municipio */}
         <TouchableOpacity style={styles.picker} onPress={() => setOpen(!open)}>
           <Text style={[styles.pickerText, !municipality && styles.placeholder]}>
             {municipality || 'Municipio'}
@@ -46,7 +56,7 @@ export default function LocationScreen({ navigation }: any) {
 
         {open && (
           <View style={styles.dropdown}>
-            <ScrollView style={{ maxHeight: 200 }}>
+            <ScrollView style={{ maxHeight: 200 }} keyboardShouldPersistTaps="handled">
               {BOYACA_MUNICIPALITIES.map(m => (
                 <TouchableOpacity
                   key={m}
@@ -75,7 +85,7 @@ export default function LocationScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.purple },
   top: {
-    height: height * 0.35,
+    height: height * 0.28,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -84,36 +94,26 @@ const styles = StyleSheet.create({
     backgroundColor: C.white,
     borderTopLeftRadius: 36,
     borderTopRightRadius: 36,
-    paddingHorizontal: 28,
-    paddingTop: 28,
-    paddingBottom: 36,
+    paddingHorizontal: 22,
+    paddingTop: 22,
+    paddingBottom: 32,
   },
   question: {
     color: C.textDark,
     fontSize: 15,
     fontFamily: 'Poppins_700Bold',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 14,
   },
-  mapArea: {
-    height: 150,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    position: 'relative',
+  mapWrap: {
+    height: 160,
+    borderRadius: 18,
+    overflow: 'hidden',
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: C.purple + '30',
   },
-  pin: { width: 40, height: 50, position: 'absolute', top: 10, zIndex: 2 },
-  boyacaShape: {
-    width: width * 0.55,
-    height: 120,
-    backgroundColor: C.pink,
-    borderTopLeftRadius: 60,
-    borderTopRightRadius: 100,
-    borderBottomLeftRadius: 100,
-    borderBottomRightRadius: 40,
-    opacity: 0.85,
-    transform: [{ rotate: '-10deg' }],
-  },
+  map: { flex: 1 },
   picker: {
     borderWidth: 1.5,
     borderColor: C.purple,
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  pickerText: { fontSize: 15, color: C.textDark },
+  pickerText: { fontSize: 15, color: C.textDark, fontFamily: 'Poppins_400Regular' },
   placeholder: { color: C.gray },
   pickerArrow: { fontSize: 22, color: C.purple, fontFamily: 'Poppins_700Bold' },
   dropdown: {
@@ -137,18 +137,14 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   dropItem: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingHorizontal: 20, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: '#f0f0f0',
   },
-  dropText: { fontSize: 14, color: C.textDark },
+  dropText: { fontSize: 14, color: C.textDark, fontFamily: 'Poppins_400Regular' },
   dropActive: { color: C.purple, fontFamily: 'Poppins_700Bold' },
   discoverRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginTop: 16,
+    flexDirection: 'row', justifyContent: 'flex-end',
+    alignItems: 'center', marginTop: 10,
   },
   discoverText: { color: C.purple, fontSize: 16, fontFamily: 'Poppins_800ExtraBold' },
   discoverArrow: { color: C.purple, fontSize: 26, fontFamily: 'Poppins_700Bold' },

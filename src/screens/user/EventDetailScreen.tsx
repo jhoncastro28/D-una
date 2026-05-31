@@ -67,7 +67,7 @@ export default function EventDetailScreen({ navigation, route }: any) {
         active="home"
         onHome={() => navigation.navigate('Feed')}
         onExplore={() => navigation.navigate('FeedFilter')}
-        onMenu={() => navigation.navigate('FeedFilter')}
+        onMenu={() => navigation.navigate('Profile')}
       />
     </View>
   );

@@ -8,7 +8,7 @@ export const MOCK_EVENTS = [
     location: 'Plaza de Bolívar',
     municipality: 'Tunja',
     description: 'El Festival Internacional de Teatro llega a Tunja con las mejores obras de compañías locales e internacionales. Tres días de magia en el corazón de Boyacá.',
-    mapX: 0.50, mapY: 0.45,
+    lat: 5.5354, lng: -73.3675,
   },
   {
     id: '2',
@@ -19,7 +19,7 @@ export const MOCK_EVENTS = [
     location: 'San Lázaro',
     municipality: 'Tunja',
     description: 'Una noche especial de jazz en vivo en el histórico barrio San Lázaro de Tunja.',
-    mapX: 0.28, mapY: 0.35,
+    lat: 5.5408, lng: -73.3612,
   },
   {
     id: '3',
@@ -30,7 +30,7 @@ export const MOCK_EVENTS = [
     location: 'El Bosque',
     municipality: 'Tunja',
     description: 'Grupos de danza folclórica de todo Boyacá se reúnen para una gran muestra de nuestra identidad cultural.',
-    mapX: 0.22, mapY: 0.58,
+    lat: 5.5290, lng: -73.3740,
   },
   {
     id: '4',
@@ -41,7 +41,7 @@ export const MOCK_EVENTS = [
     location: 'Centro Cultural',
     municipality: 'Duitama',
     description: 'La feria del libro más importante del departamento con escritores locales y talleres de escritura creativa.',
-    mapX: 0.68, mapY: 0.30,
+    lat: 5.8273, lng: -73.0268,
   },
   {
     id: '5',
@@ -52,7 +52,7 @@ export const MOCK_EVENTS = [
     location: 'Museo El Fósil',
     municipality: 'Villa de Leyva',
     description: 'Conferencia única sobre el arte rupestre de Boyacá y su relación con las culturas prehispánicas de la región.',
-    mapX: 0.35, mapY: 0.65,
+    lat: 5.6352, lng: -73.5243,
   },
   {
     id: '6',
@@ -63,7 +63,7 @@ export const MOCK_EVENTS = [
     location: 'Parque Central',
     municipality: 'Paipa',
     description: 'Los mejores sabores de la cocina boyacense en un solo lugar. Cocido boyacense, masato, chicha y más.',
-    mapX: 0.55, mapY: 0.62,
+    lat: 5.7806, lng: -73.1142,
   },
 ];
 
@@ -75,3 +75,19 @@ export const WEEK_DAYS = [
   { day: 'VIE', num: 10 },
   { day: 'SÁB', num: 11 },
 ];
+
+// Coordenadas reales del departamento de Boyacá
+export const BOYACA_REGION = {
+  latitude: 5.4545,
+  longitude: -73.3620,
+  latitudeDelta: 4.2,
+  longitudeDelta: 4.2,
+};
+
+// Coordenadas reales de Tunja
+export const TUNJA_REGION = {
+  latitude: 5.5354,
+  longitude: -73.3678,
+  latitudeDelta: 0.12,
+  longitudeDelta: 0.12,
+};

@@ -14,6 +14,7 @@ import AccountTypeScreen    from '../screens/auth/AccountTypeScreen';
 import FeedScreen           from '../screens/user/FeedScreen';
 import EventDetailScreen    from '../screens/user/EventDetailScreen';
 import FeedFilterScreen     from '../screens/user/FeedFilterScreen';
+import ProfileScreen        from '../screens/user/ProfileScreen';
 
 // Creator registration
 import CreatorStep1Screen        from '../screens/creator/CreatorStep1Screen';
@@ -34,7 +35,7 @@ export default function AppNavigator() {
         initialRouteName="Splash"
         screenOptions={{ headerShown: false, gestureEnabled: true }}
       >
-        {/* ── Onboarding ── */}
+        {/* Onboarding */}
         <Stack.Screen name="Splash"      component={SplashScreen} />
         <Stack.Screen name="Onboarding"  component={OnboardingScreen} />
         <Stack.Screen name="Login"       component={LoginScreen} />
@@ -42,12 +43,13 @@ export default function AppNavigator() {
         <Stack.Screen name="Loading"     component={LoadingScreen} />
         <Stack.Screen name="AccountType" component={AccountTypeScreen} />
 
-        {/* ── Usuario público ── */}
+        {/* Usuario público */}
         <Stack.Screen name="Feed"        component={FeedScreen} />
         <Stack.Screen name="EventDetail" component={EventDetailScreen} />
         <Stack.Screen name="FeedFilter"  component={FeedFilterScreen} />
+        <Stack.Screen name="Profile"     component={ProfileScreen} />
 
-        {/* ── Registro creador ── */}
+        {/* Registro creador */}
         <Stack.Screen name="CreatorStep1"        component={CreatorStep1Screen} />
         <Stack.Screen name="CreatorStep2"        component={CreatorStep2Screen} />
         <Stack.Screen name="CreatorStep3"        component={CreatorStep3Screen} />
