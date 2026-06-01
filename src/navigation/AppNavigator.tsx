@@ -17,8 +17,10 @@ import EventDetailScreen         from '../screens/user/EventDetailScreen';
 import FeedFilterScreen          from '../screens/user/FeedFilterScreen';
 import ProfileScreen             from '../screens/user/ProfileScreen';
 import MapScreen                 from '../screens/user/MapScreen';
+import MessagesScreen            from '../screens/user/MessagesScreen';
 
 // Creator registration
+import CreateEventScreen          from '../screens/creator/CreateEventScreen';
 import CreatorStep1Screen        from '../screens/creator/CreatorStep1Screen';
 import CreatorStep2Screen        from '../screens/creator/CreatorStep2Screen';
 import CreatorStep3Screen        from '../screens/creator/CreatorStep3Screen';
@@ -55,6 +57,10 @@ export default function AppNavigator() {
         <Stack.Screen name="FeedFilter"       component={FeedFilterScreen} />
         <Stack.Screen name="MapScreen"        component={MapScreen} />
         <Stack.Screen name="Profile"          component={ProfileScreen} />
+        <Stack.Screen name="Messages"         component={MessagesScreen} />
+
+        {/* Creación de eventos */}
+        <Stack.Screen name="CreateEvent"         component={CreateEventScreen} />
 
         {/* Registro creador */}
         <Stack.Screen name="CreatorStep1"        component={CreatorStep1Screen} />

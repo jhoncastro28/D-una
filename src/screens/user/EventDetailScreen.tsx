@@ -34,6 +34,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 export default function EventDetailScreen({ navigation, route }: any) {
   const event = route?.params?.event;
   const { user, isSaved, toggleSaved } = useAuth();
+  const [imgFailed, setImgFailed] = React.useState(false);
 
   const saved       = event ? isSaved(event.id) : false;
   const greeting    = user ? user.name.split(' ')[0] : 'viajero';
@@ -67,10 +68,17 @@ export default function EventDetailScreen({ navigation, route }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Imagen del evento (categoría) */}
-        {catImg
-          ? <Image source={catImg} style={styles.eventImage} resizeMode="cover" />
-          : <View style={[styles.eventImage, { backgroundColor: catColor }]} />
+        {/* Imagen del evento — carga URL real, fallback a ícono de categoría */}
+        {event?.image && !imgFailed
+          ? <Image
+              source={{ uri: event.image }}
+              style={styles.eventImage}
+              resizeMode="cover"
+              onError={() => setImgFailed(true)}
+            />
+          : catImg
+            ? <Image source={catImg} style={styles.eventImage} resizeMode="cover" />
+            : <View style={[styles.eventImage, { backgroundColor: catColor }]} />
         }
 
         {/* Categoría badge */}
@@ -146,7 +154,7 @@ export default function EventDetailScreen({ navigation, route }: any) {
       <BottomNav
         active="home"
         onHome={() => navigation.navigate('Feed')}
-        onMap={() => navigation.navigate('MapScreen')}
+        onMessages={() => navigation.navigate('Messages')}
         onMenu={() => navigation.navigate('Profile')}
       />
     </View>

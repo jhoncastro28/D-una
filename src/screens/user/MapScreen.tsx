@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, StatusBar, Dimensions,
 } from 'react-native';
-import MapView, { Marker, Callout, PROVIDER_DEFAULT } from 'react-native-maps';
+import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { C } from '../../constants';
 import { MOCK_EVENTS, BOYACA_REGION } from '../../constants/mockData';
@@ -21,9 +21,10 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function MapScreen({ navigation }: any) {
-  const { isSaved } = useAuth();
+  const { isSaved, userEvents } = useAuth();
   const [selected, setSelected] = useState<string | null>(null);
-  const selectedEvent = MOCK_EVENTS.find(e => e.id === selected);
+  const allEvents = [...MOCK_EVENTS, ...userEvents];
+  const selectedEvent = allEvents.find(e => e.id === selected);
 
   return (
     <View style={styles.container}>
@@ -41,11 +42,11 @@ export default function MapScreen({ navigation }: any) {
       {/* Google Maps */}
       <View style={styles.mapWrap}>
         <MapView
-          provider={PROVIDER_DEFAULT}
+          provider={PROVIDER_GOOGLE}
           style={styles.map}
           initialRegion={BOYACA_REGION}
         >
-          {MOCK_EVENTS.map(ev => (
+          {allEvents.map(ev => (
             <Marker
               key={ev.id}
               coordinate={{ latitude: ev.lat, longitude: ev.lng }}
@@ -81,9 +82,9 @@ export default function MapScreen({ navigation }: any) {
       )}
 
       <BottomNav
-        active="map"
+        active="home"
         onHome={() => navigation.navigate('Feed')}
-        onMap={() => {}}
+        onMessages={() => navigation.navigate('Messages')}
         onMenu={() => navigation.navigate('Profile')}
       />
     </View>

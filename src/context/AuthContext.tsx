@@ -29,6 +29,7 @@ export interface StoredUser {
 
 export interface CreatorRegistration {
   id: string;
+  type: 'publico' | 'creador';
   email: string;
   password: string;
   name: string;
@@ -41,6 +42,23 @@ export interface CreatorRegistration {
   phone: string;
   status: RegistrationStatus;
   submittedAt: string;
+}
+
+export interface DunaEvent {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  time: string;
+  location: string;
+  municipality: string;
+  description: string;
+  lat: number;
+  lng: number;
+  image?: string;
+  creatorId: string;
+  creatorName: string;
+  createdAt: string;
 }
 
 export interface CreatorFormData {
@@ -62,6 +80,7 @@ const ADMIN_PASSWORD = 'admin123';
 const USERS_KEY = '@duna_users';
 const SESSION_KEY = '@duna_session';
 const REGISTRATIONS_KEY = '@duna_creator_registrations';
+const EVENTS_KEY = '@duna_events';
 
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 
@@ -69,6 +88,7 @@ interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   creatorFormData: CreatorFormData;
+  userEvents: DunaEvent[];
   login: (email: string, password: string) => Promise<{ role: Role; registrationStatus?: RegistrationStatus }>;
   registerPublico: (name: string, email: string, password: string, municipality: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -80,6 +100,7 @@ interface AuthContextType {
   approveCreator: (id: string) => Promise<void>;
   rejectCreator: (id: string) => Promise<void>;
   updateUser: (data: Partial<StoredUser>) => Promise<void>;
+  createEvent: (data: Omit<DunaEvent, 'id' | 'creatorId' | 'creatorName' | 'createdAt'>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -97,11 +118,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [creatorFormData, setCreatorFormData] = useState<CreatorFormData>({});
+  const [userEvents, setUserEvents] = useState<DunaEvent[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const sessionRaw = await AsyncStorage.getItem(SESSION_KEY);
+        const [sessionRaw, eventsRaw] = await Promise.all([
+          AsyncStorage.getItem(SESSION_KEY),
+          AsyncStorage.getItem(EVENTS_KEY),
+        ]);
+        if (eventsRaw) setUserEvents(JSON.parse(eventsRaw));
         if (!sessionRaw) { setLoading(false); return; }
         const session = JSON.parse(sessionRaw);
         if (session.role === 'admin') {
@@ -168,28 +194,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (reg.status === 'rejected') {
         throw new Error('REJECTED');
       }
+      // Aprobado pero la cuenta no existe en @duna_users (recuperación de error parcial)
+      if (reg.status === 'approved') {
+        const usersForRecovery = await getUsers();
+        const recoveredRole: Role = reg.type === 'publico' ? 'publico' : 'creador';
+        const newUser: StoredUser = {
+          id: generateId(),
+          email: reg.email,
+          password: reg.password,
+          name: reg.name,
+          role: recoveredRole,
+          municipality: reg.municipality,
+          savedEvents: [],
+          brand: reg.brand,
+          registrationStatus: 'approved',
+        };
+        await saveUsers([...usersForRecovery, newUser]);
+        const authUser = storedToAuth(newUser);
+        await saveSession(authUser);
+        return { role: recoveredRole, registrationStatus: 'approved' as RegistrationStatus };
+      }
     }
 
     throw new Error('INVALID_CREDENTIALS');
   };
 
   const registerPublico = async (name: string, email: string, password: string, municipality: string) => {
-    const users = await getUsers();
     const lowerEmail = email.toLowerCase().trim();
+
+    // Verificar que el correo no exista ya en cuentas activas
+    const users = await getUsers();
     if (users.find(u => u.email.toLowerCase() === lowerEmail)) {
       throw new Error('EMAIL_EXISTS');
     }
-    const newUser: StoredUser = {
+
+    // Verificar que no haya ya un registro pendiente/rechazado con ese correo
+    const regsRaw = await AsyncStorage.getItem(REGISTRATIONS_KEY);
+    const regs: CreatorRegistration[] = regsRaw ? JSON.parse(regsRaw) : [];
+    if (regs.find(r => r.email.toLowerCase() === lowerEmail)) {
+      throw new Error('EMAIL_EXISTS');
+    }
+
+    // Guardar como solicitud pendiente de aprobación (igual que creadores)
+    const reg: CreatorRegistration = {
       id: generateId(),
+      type: 'publico',
       email: lowerEmail,
       password,
       name: name.trim(),
-      role: 'publico',
+      brand: '',
       municipality,
-      savedEvents: [],
+      orgTypes: [],
+      categories: [],
+      instagram: '',
+      contactEmail: lowerEmail,
+      phone: '',
+      status: 'pending',
+      submittedAt: new Date().toISOString(),
     };
-    await saveUsers([...users, newUser]);
-    await saveSession(storedToAuth(newUser));
+    await AsyncStorage.setItem(REGISTRATIONS_KEY, JSON.stringify([...regs, reg]));
+    // No se crea sesión: el usuario debe esperar aprobación del admin
   };
 
   const logout = async () => {
@@ -238,6 +302,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const reg: CreatorRegistration = {
       id: generateId(),
+      type: 'creador',
       email: lowerEmail,
       password: d.password,
       name: d.name.trim(),
@@ -276,7 +341,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: reg.email,
         password: reg.password,
         name: reg.name,
-        role: 'creador',
+        role: reg.type === 'publico' ? 'publico' : 'creador',
         municipality: reg.municipality,
         savedEvents: [],
         brand: reg.brand,
@@ -295,6 +360,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(REGISTRATIONS_KEY, JSON.stringify(regs));
   };
 
+  const createEvent = async (data: Omit<DunaEvent, 'id' | 'creatorId' | 'creatorName' | 'createdAt'>) => {
+    if (!user) throw new Error('NOT_LOGGED_IN');
+    const newEvent: DunaEvent = {
+      id: generateId(),
+      ...data,
+      creatorId: user.id,
+      creatorName: user.name,
+      createdAt: new Date().toISOString(),
+    };
+    const updated = [...userEvents, newEvent];
+    setUserEvents(updated);
+    await AsyncStorage.setItem(EVENTS_KEY, JSON.stringify(updated));
+  };
+
   const updateUser = async (data: Partial<StoredUser>) => {
     if (!user) return;
     const users = await getUsers();
@@ -308,12 +387,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      user, loading, creatorFormData,
+      user, loading, creatorFormData, userEvents,
       login, registerPublico, logout,
       toggleSaved, isSaved,
       updateCreatorFormData, submitCreatorRegistration,
       getCreatorRegistrations, approveCreator, rejectCreator,
-      updateUser,
+      updateUser, createEvent,
     }}>
       {children}
     </AuthContext.Provider>

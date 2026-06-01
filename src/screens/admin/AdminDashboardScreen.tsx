@@ -21,11 +21,18 @@ const STATUS_LABELS: Record<RegistrationStatus, string> = {
 };
 
 export default function AdminDashboardScreen({ navigation }: any) {
-  const { logout, getCreatorRegistrations, approveCreator, rejectCreator } = useAuth();
+  const { user, logout, getCreatorRegistrations, approveCreator, rejectCreator } = useAuth();
   const [registrations, setRegistrations] = useState<CreatorRegistration[]>([]);
   const [loading, setLoading]             = useState(true);
   const [refreshing, setRefreshing]       = useState(false);
-  const [filter, setFilter]               = useState<RegistrationStatus | 'all'>('all');
+  const [filter, setFilter]               = useState<RegistrationStatus | 'all'>('pending');
+
+  // Guard: solo admin puede estar aquí
+  useEffect(() => {
+    if (!user || user.role !== 'admin') {
+      navigation.replace('Onboarding');
+    }
+  }, [user]);
 
   const load = useCallback(async () => {
     const data = await getCreatorRegistrations();
@@ -135,10 +142,23 @@ export default function AdminDashboardScreen({ navigation }: any) {
           {filtered.map(reg => (
             <View key={reg.id} style={styles.card}>
               <View style={styles.cardTop}>
-                <View style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[reg.status] + '20', borderColor: STATUS_COLORS[reg.status] }]}>
-                  <Text style={[styles.statusText, { color: STATUS_COLORS[reg.status] }]}>
-                    {STATUS_LABELS[reg.status]}
-                  </Text>
+                <View style={styles.badgesRow}>
+                  <View style={[styles.typeBadge, reg.type === 'creador' ? styles.typeBadgeCreador : styles.typeBadgePublico]}>
+                    <Ionicons
+                      name={reg.type === 'creador' ? 'star-outline' : 'person-outline'}
+                      size={10}
+                      color={reg.type === 'creador' ? C.purple : C.teal}
+                      style={{ marginRight: 3 }}
+                    />
+                    <Text style={[styles.typeBadgeText, { color: reg.type === 'creador' ? C.purple : C.teal }]}>
+                      {reg.type === 'creador' ? 'Creador' : 'Público'}
+                    </Text>
+                  </View>
+                  <View style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[reg.status] + '20', borderColor: STATUS_COLORS[reg.status] }]}>
+                    <Text style={[styles.statusText, { color: STATUS_COLORS[reg.status] }]}>
+                      {STATUS_LABELS[reg.status]}
+                    </Text>
+                  </View>
                 </View>
                 <Text style={styles.cardDate}>
                   {new Date(reg.submittedAt).toLocaleDateString('es-CO')}
@@ -261,6 +281,15 @@ const styles = StyleSheet.create({
     padding: 16, marginBottom: 12, elevation: 2,
   },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  badgesRow: { flexDirection: 'row', gap: 6, alignItems: 'center' },
+  typeBadge: {
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1.5, borderRadius: 20,
+    paddingHorizontal: 8, paddingVertical: 3,
+  },
+  typeBadgeCreador: { backgroundColor: C.purple + '12', borderColor: C.purple + '60' },
+  typeBadgePublico: { backgroundColor: C.teal + '12', borderColor: C.teal + '60' },
+  typeBadgeText: { fontSize: 10, fontFamily: 'Poppins_700Bold' },
   statusBadge: {
     borderWidth: 1.5, borderRadius: 20,
     paddingHorizontal: 10, paddingVertical: 3,

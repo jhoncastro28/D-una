@@ -144,7 +144,7 @@ export default function ProfileScreen({ navigation }: any) {
       <BottomNav
         active="menu"
         onHome={() => navigation.navigate('Feed')}
-        onMap={() => navigation.navigate('MapScreen')}
+        onMessages={() => navigation.navigate('Messages')}
         onMenu={() => {}}
       />
     </View>

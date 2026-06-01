@@ -3,12 +3,12 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, Image, ImageBackground, Dimensions,
 } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { C } from '../../constants';
 import { Icons } from '../../constants/icons';
-import { MOCK_EVENTS, WEEK_DAYS } from '../../constants/mockData';
+import { MOCK_EVENTS, WEEK_DAYS, MUNICIPALITY_REGIONS, BOYACA_REGION } from '../../constants/mockData';
 import BottomNav from '../../components/BottomNav';
-import BoyacaMapSVG, { MapPin } from '../../components/BoyacaMapSVG';
 import { useAuth } from '../../context/AuthContext';
 
 const { width } = Dimensions.get('window');
@@ -39,31 +39,39 @@ const CATEGORY_COLORS: Record<string, string> = {
   otros:             C.gray,
 };
 
+function EventThumb({ ev, catImg, catColor }: { ev: any; catImg: any; catColor: string }) {
+  const [failed, setFailed] = useState(false);
+  if (ev.image && !failed) {
+    return (
+      <Image
+        source={{ uri: ev.image }}
+        style={styles.eventThumb}
+        resizeMode="cover"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+  if (catImg) return <Image source={catImg} style={styles.eventThumb} resizeMode="cover" />;
+  return <View style={[styles.eventThumb, { backgroundColor: catColor }]} />;
+}
+
 export default function FeedScreen({ navigation }: any) {
-  const { user, isSaved } = useAuth();
+  const { user, isSaved, userEvents } = useAuth();
   const [activeDay, setActiveDay] = useState(0);
 
   const greeting   = user ? user.name.split(' ')[0] : 'viajero';
   const municipality = user?.municipality ?? 'Tunja';
   const initials = user ? user.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() : '?';
 
+  const allEvents = useMemo(() => [...MOCK_EVENTS, ...userEvents], [userEvents]);
+
   const localEvents = useMemo(
-    () => MOCK_EVENTS.filter(e => e.municipality === municipality),
-    [municipality],
+    () => allEvents.filter(e => e.municipality === municipality),
+    [allEvents, municipality],
   );
 
-  // Build map pins for the SVG
-  const mapPins: MapPin[] = useMemo(() =>
-    localEvents.slice(0, 4).map((ev, i) => ({
-      id: ev.id,
-      lat: ev.lat,
-      lng: ev.lng,
-      label: ev.location,
-      sublabel: ev.category.replace('eventosculturales', 'Cultural'),
-      side: i % 2 === 0 ? 'right' : 'left',
-    })),
-    [localEvents],
-  );
+  const mapRegion = MUNICIPALITY_REGIONS[municipality] ?? BOYACA_REGION;
+  const mapEvents = localEvents.length > 0 ? localEvents : allEvents.slice(0, 3);
 
   const mapW = width - 68;  // inside card (20 margin each side + 14 padding each side)
 
@@ -119,19 +127,27 @@ export default function FeedScreen({ navigation }: any) {
 
         <Text style={styles.nearText}>Estos son los eventos que{'\n'}tenemos cerca de ti!</Text>
 
-        {/* Mapa SVG Boyacá */}
+        {/* Mapa real */}
         <View style={styles.mapCard}>
           <Text style={styles.mapCity}>{municipality}</Text>
-          <View style={[styles.mapBg, { height: mapW * 0.85 }]}>
-            <BoyacaMapSVG
-              width={mapW}
-              height={mapW * 0.85}
-              fillColor="rgba(148,80,240,0.6)"
-              bgColor="transparent"
-              strokeColor="rgba(200,140,255,0.8)"
-              showPins={mapPins.length > 0}
-              pins={mapPins}
-            />
+          <View style={[styles.mapBg, { height: mapW * 0.65 }]} pointerEvents="none">
+            <MapView
+              provider={PROVIDER_GOOGLE}
+              style={StyleSheet.absoluteFill}
+              initialRegion={mapRegion}
+              scrollEnabled={false}
+              zoomEnabled={false}
+              rotateEnabled={false}
+              pitchEnabled={false}
+            >
+              {mapEvents.map(ev => (
+                <Marker
+                  key={ev.id}
+                  coordinate={{ latitude: ev.lat, longitude: ev.lng }}
+                  pinColor={C.pink}
+                />
+              ))}
+            </MapView>
           </View>
           <TouchableOpacity
             style={styles.mapFullBtn}
@@ -143,7 +159,7 @@ export default function FeedScreen({ navigation }: any) {
         </View>
 
         {/* Lista de eventos */}
-        {MOCK_EVENTS.map(ev => {
+        {allEvents.map(ev => {
           const catImg = CATEGORY_IMG[ev.category];
           const catColor = CATEGORY_COLORS[ev.category] ?? C.purple;
           return (
@@ -152,10 +168,7 @@ export default function FeedScreen({ navigation }: any) {
               style={styles.eventCard}
               onPress={() => navigation.navigate('EventDetail', { event: ev })}
             >
-              {catImg
-                ? <Image source={catImg} style={styles.eventThumb} resizeMode="cover" />
-                : <View style={[styles.eventThumb, { backgroundColor: catColor }]} />
-              }
+              <EventThumb ev={ev} catImg={catImg} catColor={catColor} />
               <View style={styles.eventInfo}>
                 <Text style={styles.eventTitle} numberOfLines={1}>{ev.title}</Text>
                 <Text style={styles.eventMeta}>{ev.date}  ·  {ev.time}</Text>
@@ -173,10 +186,20 @@ export default function FeedScreen({ navigation }: any) {
         <View style={{ height: 20 }} />
       </ScrollView>
 
+      {/* FAB: solo para creadores aprobados */}
+      {user?.role === 'creador' && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => navigation.navigate('CreateEvent')}
+        >
+          <Ionicons name="add" size={28} color={C.white} />
+        </TouchableOpacity>
+      )}
+
       <BottomNav
         active="home"
         onHome={() => {}}
-        onMap={() => navigation.navigate('MapScreen')}
+        onMessages={() => navigation.navigate('Messages')}
         onMenu={() => navigation.navigate('Profile')}
       />
     </View>
@@ -229,8 +252,7 @@ const styles = StyleSheet.create({
   mapCity: { color: C.pink, fontSize: 18, fontFamily: 'Poppins_900Black', marginBottom: 10 },
   mapBg: {
     borderRadius: 14, overflow: 'hidden',
-    backgroundColor: '#2d0080',
-    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#c8d6e5',
   },
   mapFullBtn: {
     flexDirection: 'row', alignItems: 'center',
@@ -247,4 +269,13 @@ const styles = StyleSheet.create({
   eventTitle: { color: C.textDark, fontFamily: 'Poppins_800ExtraBold', fontSize: 13, marginBottom: 4 },
   eventMeta: { color: C.gray, fontSize: 11, marginBottom: 2 },
   savedBadge: { paddingRight: 14 },
+  fab: {
+    position: 'absolute', bottom: 100, right: 24,
+    width: 56, height: 56, borderRadius: 28,
+    backgroundColor: C.pink,
+    alignItems: 'center', justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25, shadowRadius: 8,
+  },
 });

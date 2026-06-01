@@ -5,13 +5,13 @@ import { C } from '../constants';
 import { Icons } from '../constants/icons';
 
 interface Props {
-  active: 'home' | 'map' | 'menu';
+  active: 'home' | 'messages' | 'menu';
   onHome: () => void;
-  onMap: () => void;
+  onMessages: () => void;
   onMenu: () => void;
 }
 
-export default function BottomNav({ active, onHome, onMap, onMenu }: Props) {
+export default function BottomNav({ active, onHome, onMessages, onMenu }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.pill}>
@@ -24,13 +24,13 @@ export default function BottomNav({ active, onHome, onMap, onMenu }: Props) {
           />
         </TouchableOpacity>
 
-        {/* Map — navigate icon */}
-        <TouchableOpacity style={styles.btn} onPress={onMap}>
-          <View style={[styles.mapCircle, active === 'map' && styles.mapCircleActive]}>
+        {/* Mensajes */}
+        <TouchableOpacity style={styles.btn} onPress={onMessages}>
+          <View style={[styles.msgCircle, active === 'messages' && styles.msgCircleActive]}>
             <Ionicons
-              name="navigate"
+              name="chatbubble-ellipses"
               size={19}
-              color={active === 'map' ? C.white : C.purple}
+              color={active === 'messages' ? C.white : C.purple}
             />
           </View>
         </TouchableOpacity>
@@ -75,12 +75,12 @@ const styles = StyleSheet.create({
   icon: { width: 30, height: 30 },
   iconInactive: { opacity: 0.35 },
 
-  mapCircle: {
+  msgCircle: {
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: C.grayLight,
     alignItems: 'center', justifyContent: 'center',
   },
-  mapCircleActive: { backgroundColor: C.pink },
+  msgCircleActive: { backgroundColor: C.teal },
 
   avatarCircle: {
     width: 38, height: 38, borderRadius: 19,

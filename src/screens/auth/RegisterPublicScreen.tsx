@@ -34,12 +34,12 @@ export default function RegisterPublicScreen({ navigation }: any) {
     setLoading(true);
     try {
       await registerPublico(name.trim(), email.trim(), password, municipality);
-      navigation.replace('Feed');
+      navigation.replace('RegistrationPending');
     } catch (err: any) {
       if (err.message === 'EMAIL_EXISTS') {
-        Alert.alert('Correo ya registrado', 'Ya existe una cuenta con ese correo.');
+        Alert.alert('Correo ya registrado', 'Ya existe una solicitud o cuenta con ese correo.');
       } else {
-        Alert.alert('Error', 'No se pudo crear la cuenta. Intenta de nuevo.');
+        Alert.alert('Error', 'No se pudo enviar la solicitud. Intenta de nuevo.');
       }
     } finally {
       setLoading(false);
