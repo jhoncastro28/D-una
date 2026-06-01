@@ -32,6 +32,10 @@ export const Icons = {
   catDeportivos:   require('../../assets/flat/cat_deportivos.png'),
   catOtros:        require('../../assets/flat/cat_otros.png'),
 
+  // ── Mapa y ubicación ──────────────────────────────────────────────────
+  mapaBoyaca:      require('../../assets/flat/mapa_boyaca.png'),
+  locationPin:     require('../../assets/flat/location_2.png'),
+
   // ── Patrones de fondo ─────────────────────────────────────────────────
   patternPurple:   require('../../assets/patron_purple.png'),
   patternWhite:    require('../../assets/patron_white.png'),

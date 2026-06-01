@@ -26,7 +26,7 @@ export default function AccountTypeScreen({ navigation }: any) {
         {/* Público → registro directo */}
         <TouchableOpacity
           style={styles.option}
-          onPress={() => navigation.navigate('RegisterPublic')}
+          onPress={() => navigation.navigate('Location')}
         >
           <Image source={Icons.profilePublic} style={styles.optIcon} resizeMode="contain" />
           <View style={styles.optInfo}>

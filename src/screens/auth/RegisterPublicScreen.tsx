@@ -9,13 +9,13 @@ import { Icons } from '../../constants/icons';
 import DunaLogo from '../../components/DunaLogo';
 import { useAuth } from '../../context/AuthContext';
 
-export default function RegisterPublicScreen({ navigation }: any) {
+export default function RegisterPublicScreen({ navigation, route }: any) {
   const { registerPublico } = useAuth();
   const [name, setName]         = useState('');
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm]   = useState('');
-  const [municipality, setMunicipality] = useState('');
+  const [municipality, setMunicipality] = useState<string>(route?.params?.municipality ?? '');
   const [openMuni, setOpenMuni] = useState(false);
   const [loading, setLoading]   = useState(false);
 
