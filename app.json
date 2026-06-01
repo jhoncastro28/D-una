@@ -27,6 +27,18 @@
           "apiKey": "TU_GOOGLE_MAPS_API_KEY_AQUI"
         }
       }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7b144ef8-96f5-4803-9782-33809358986f"
+      }
+    },
+    "owner": "jhonc",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7b144ef8-96f5-4803-9782-33809358986f"
     }
   }
 }
