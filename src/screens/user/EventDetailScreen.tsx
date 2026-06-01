@@ -36,14 +36,30 @@ export default function EventDetailScreen({ navigation, route }: any) {
   const { user, isSaved, toggleSaved } = useAuth();
   const [imgFailed, setImgFailed] = React.useState(false);
 
-  const saved       = event ? isSaved(event.id) : false;
-  const greeting    = user ? user.name.split(' ')[0] : 'viajero';
-  const catImg      = event ? CATEGORY_IMG[event.category] : null;
-  const catColor    = event ? (CATEGORY_COLORS[event.category] ?? C.purple) : C.purple;
+  if (!event) {
+    return (
+      <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, marginBottom: 20 }}>
+          Evento no encontrado
+        </Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backCircle}>
+          <Ionicons name="arrow-back" size={20} color={C.purple} />
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const saved    = isSaved(event.id);
+  const greeting = user ? user.name.split(' ')[0] : 'viajero';
+  const catImg   = CATEGORY_IMG[event.category];
+  const catColor = CATEGORY_COLORS[event.category] ?? C.purple;
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <Image source={Icons.patternPurple} style={StyleSheet.absoluteFill} resizeMode="cover" />
+      </View>
 
       {/* Header */}
       <View style={styles.header}>
@@ -57,7 +73,7 @@ export default function EventDetailScreen({ navigation, route }: any) {
           <Text style={styles.dateText}>{event?.date ?? 'Próximamente'}</Text>
         </View>
         {user && (
-          <TouchableOpacity onPress={() => event && toggleSaved(event.id)} style={styles.heartBtn}>
+          <TouchableOpacity onPress={() => toggleSaved(event.id)} style={styles.heartBtn}>
             <Ionicons
               name={saved ? 'heart' : 'heart-outline'}
               size={26}
@@ -125,7 +141,7 @@ export default function EventDetailScreen({ navigation, route }: any) {
         {user && (
           <TouchableOpacity
             style={[styles.interesaBtn, saved && styles.interesaBtnActive]}
-            onPress={() => event && toggleSaved(event.id)}
+            onPress={() => toggleSaved(event.id)}
           >
             <Ionicons
               name={saved ? 'heart' : 'heart-outline'}

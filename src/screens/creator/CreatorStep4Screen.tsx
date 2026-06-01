@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, StatusBar,
-  ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator,
+  View, Text, StyleSheet, TouchableOpacity, StatusBar, Image,
+  ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, ImageBackground,
 } from 'react-native';
 import { C } from '../../constants';
+import { Icons } from '../../constants/icons';
 import PurpleInput from '../../components/PurpleInput';
 import { useAuth } from '../../context/AuthContext';
 
@@ -39,10 +40,11 @@ export default function CreatorStep4Screen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <ImageBackground source={Icons.patternPurple} style={styles.pattern} resizeMode="cover" pointerEvents="none" />
 
       <View style={styles.purpleTop}>
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>{'<'}</Text>
+          <Image source={Icons.arrowBack} style={styles.backIcon} resizeMode="contain" />
         </TouchableOpacity>
         <Text style={styles.stepLabel}>Paso 4 de 4</Text>
       </View>
@@ -99,9 +101,10 @@ export default function CreatorStep4Screen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.purple },
+  pattern: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   purpleTop: { height: 90, justifyContent: 'flex-end', paddingBottom: 10, paddingHorizontal: 24 },
   back: { position: 'absolute', top: 52, left: 24 },
-  backText: { color: C.white, fontSize: 28, fontFamily: 'Poppins_700Bold' },
+  backIcon: { width: 28, height: 28 },
   stepLabel: {
     color: 'rgba(255,255,255,0.6)', fontSize: 12,
     textAlign: 'right', fontFamily: 'Poppins_600SemiBold',

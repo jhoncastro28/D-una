@@ -1,9 +1,10 @@
 import React from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, StatusBar, Dimensions,
+  View, Text, StyleSheet, TouchableOpacity, StatusBar, Dimensions, ImageBackground,
 } from 'react-native';
 import { C } from '../../constants';
 import { F } from '../../constants/fonts';
+import { Icons } from '../../constants/icons';
 import DunaLogo from '../../components/DunaLogo';
 
 const { height } = Dimensions.get('window');
@@ -12,6 +13,7 @@ export default function OnboardingScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <ImageBackground source={Icons.patternPurple} style={StyleSheet.absoluteFill} resizeMode="cover" pointerEvents="none" />
 
       {/* Purple top */}
       <View style={styles.top}>

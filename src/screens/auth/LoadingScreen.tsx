@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, StatusBar, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Animated, StatusBar, Dimensions, ImageBackground } from 'react-native';
 import { C } from '../../constants';
+import { Icons } from '../../constants/icons';
 import DunaLogo from '../../components/DunaLogo';
 
 const { width } = Dimensions.get('window');
@@ -24,6 +25,7 @@ export default function LoadingScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <ImageBackground source={Icons.patternPurple} style={StyleSheet.absoluteFill} resizeMode="cover" pointerEvents="none" />
       <View style={styles.center}>
         <DunaLogo size="large" />
       </View>

@@ -1,19 +1,28 @@
 export const Icons = {
-  // Logos
+  // ── Logos ─────────────────────────────────────────────────────────────
   logoIcon:        require('../../assets/flat/logo_icon.png'),
   logoWordmark:    require('../../assets/flat/logo_wordmark.png'),
-  // UI
-  search:          require('../../assets/flat/search.png'),
+
+  // ── Navegación ────────────────────────────────────────────────────────
+  arrowBack:       require('../../assets/flat/arrow_back.png'),
+  arrowForward:    require('../../assets/flat/arrow_forward.png'),
+
+  // ── Bottom nav ────────────────────────────────────────────────────────
   home:            require('../../assets/flat/home.png'),
+  messages:        require('../../assets/flat/messages_icon.png'),
+  search:          require('../../assets/flat/search.png'),
   location:        require('../../assets/flat/location.png'),
-  // Perfiles
-  profilePublic:   require('../../assets/flat/profile_public.png'),
-  profileCreator:  require('../../assets/flat/profile_creator.png'),
-  // Caritas
+
+  // ── Perfiles ──────────────────────────────────────────────────────────
+  profilePublic:   require('../../assets/flat/profile_public_icon.png'),
+  profileCreator:  require('../../assets/flat/profile_creator_icon.png'),
+
+  // ── Expresiones / caritas ─────────────────────────────────────────────
   faceHappy:       require('../../assets/flat/face_happy.png'),
   faceSurprised:   require('../../assets/flat/face_surprised.png'),
   verified:        require('../../assets/flat/verified.png'),
-  // Categorías creador
+
+  // ── Categorías de eventos ─────────────────────────────────────────────
   catConciertos:   require('../../assets/flat/cat_conciertos.png'),
   catTalleres:     require('../../assets/flat/cat_talleres.png'),
   catFerias:       require('../../assets/flat/cat_ferias.png'),
@@ -22,7 +31,8 @@ export const Icons = {
   catFiestas:      require('../../assets/flat/cat_fiestas.png'),
   catDeportivos:   require('../../assets/flat/cat_deportivos.png'),
   catOtros:        require('../../assets/flat/cat_otros.png'),
-  // Patrones de fondo
+
+  // ── Patrones de fondo ─────────────────────────────────────────────────
   patternPurple:   require('../../assets/patron_purple.png'),
   patternWhite:    require('../../assets/patron_white.png'),
   patternBanner:   require('../../assets/patron_banner.png'),

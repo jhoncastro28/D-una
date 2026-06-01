@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, StatusBar,
   ScrollView, TextInput, KeyboardAvoidingView, Platform,
-  Alert, ActivityIndicator, Image,
+  Alert, ActivityIndicator, Image, ImageBackground,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { C, BOYACA_MUNICIPALITIES } from '../../constants';
+import { Icons } from '../../constants/icons';
 import { useAuth } from '../../context/AuthContext';
 import { MUNICIPALITY_REGIONS, BOYACA_REGION } from '../../constants/mockData';
 
@@ -63,13 +64,30 @@ export default function CreateEventScreen({ navigation }: any) {
     }
   };
 
+  const VALID_MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio',
+                        'agosto','septiembre','octubre','noviembre','diciembre'];
+  const TIME_PATTERN = /^\d{1,2}:\d{2}\s*(AM|PM|am|pm)$/i;
+
+  const isValidDate = (d: string) => {
+    const m = d.trim().toLowerCase().match(/^(\d{1,2})\s+de\s+(\w+)$/);
+    if (!m) return false;
+    const day = parseInt(m[1], 10);
+    return VALID_MONTHS.includes(m[2]) && day >= 1 && day <= 31;
+  };
+
   const handleSubmit = async () => {
-    if (!title.trim()) { Alert.alert('Campo requerido', 'Ingresa el nombre del evento.'); return; }
-    if (!category)     { Alert.alert('Campo requerido', 'Selecciona una categoría.'); return; }
-    if (!date.trim())  { Alert.alert('Campo requerido', 'Ingresa la fecha del evento.'); return; }
-    if (!time.trim())  { Alert.alert('Campo requerido', 'Ingresa la hora del evento.'); return; }
+    if (!title.trim())    { Alert.alert('Campo requerido', 'Ingresa el nombre del evento.'); return; }
+    if (!category)        { Alert.alert('Campo requerido', 'Selecciona una categoría.'); return; }
+    if (!date.trim())     { Alert.alert('Campo requerido', 'Ingresa la fecha del evento.'); return; }
+    if (!isValidDate(date)) {
+      Alert.alert('Fecha inválida', 'Ingresa una fecha real. Ej: "15 de junio"'); return;
+    }
+    if (!time.trim())     { Alert.alert('Campo requerido', 'Ingresa la hora del evento.'); return; }
+    if (!TIME_PATTERN.test(time.trim())) {
+      Alert.alert('Formato de hora inválido', 'Usa el formato: "8:00PM" o "3:30AM"'); return;
+    }
     if (!location.trim()) { Alert.alert('Campo requerido', 'Ingresa el lugar del evento.'); return; }
-    if (!municipality) { Alert.alert('Campo requerido', 'Selecciona el municipio.'); return; }
+    if (!municipality)    { Alert.alert('Campo requerido', 'Selecciona el municipio.'); return; }
 
     const region = MUNICIPALITY_REGIONS[municipality] ?? BOYACA_REGION;
 
@@ -103,11 +121,12 @@ export default function CreateEventScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <ImageBackground source={Icons.patternPurple} style={styles.pattern} resizeMode="cover" pointerEvents="none" />
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={C.white} />
+          <Image source={Icons.arrowBack} style={{ width: 26, height: 26 }} resizeMode="contain" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Crear evento</Text>
         <View style={{ width: 36 }} />
@@ -151,6 +170,7 @@ export default function CreateEventScreen({ navigation }: any) {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.catRow}
+            nestedScrollEnabled
           >
             {CATEGORIES.map(cat => {
               const active = category === cat.key;
@@ -269,6 +289,7 @@ function Input({ value, onChange, placeholder }: { value: string; onChange: (v: 
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.purple },
+  pattern: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
 
   header: {
     flexDirection: 'row', alignItems: 'center',

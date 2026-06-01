@@ -26,13 +26,11 @@ export default function BottomNav({ active, onHome, onMessages, onMenu }: Props)
 
         {/* Mensajes */}
         <TouchableOpacity style={styles.btn} onPress={onMessages}>
-          <View style={[styles.msgCircle, active === 'messages' && styles.msgCircleActive]}>
-            <Ionicons
-              name="chatbubble-ellipses"
-              size={19}
-              color={active === 'messages' ? C.white : C.purple}
-            />
-          </View>
+          <Image
+            source={Icons.messages}
+            style={[styles.icon, active !== 'messages' && styles.iconInactive]}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
 
         {/* Menu / Perfil */}
@@ -74,13 +72,6 @@ const styles = StyleSheet.create({
   btn: { alignItems: 'center', justifyContent: 'center', padding: 4 },
   icon: { width: 30, height: 30 },
   iconInactive: { opacity: 0.35 },
-
-  msgCircle: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: C.grayLight,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  msgCircleActive: { backgroundColor: C.teal },
 
   avatarCircle: {
     width: 38, height: 38, borderRadius: 19,

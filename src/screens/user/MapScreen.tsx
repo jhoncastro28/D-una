@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, StatusBar, Dimensions,
+  View, Text, StyleSheet, TouchableOpacity, StatusBar, Image, ImageBackground,
 } from 'react-native';
 import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { C } from '../../constants';
 import { MOCK_EVENTS, BOYACA_REGION } from '../../constants/mockData';
 import BottomNav from '../../components/BottomNav';
+import { Icons } from '../../constants/icons';
 import { useAuth } from '../../context/AuthContext';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -29,11 +30,12 @@ export default function MapScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <ImageBackground source={Icons.patternPurple} style={styles.headerPattern} resizeMode="cover" pointerEvents="none" />
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={C.white} />
+          <Image source={Icons.arrowBack} style={{ width: 26, height: 26 }} resizeMode="contain" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Eventos en Boyacá</Text>
         <View style={{ width: 36 }} />
@@ -93,6 +95,7 @@ export default function MapScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.purple },
+  headerPattern: { position: 'absolute', top: 0, left: 0, right: 0, height: 120 },
   header: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingTop: 52, paddingBottom: 12,

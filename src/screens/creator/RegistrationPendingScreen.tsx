@@ -14,8 +14,8 @@ export default function RegistrationPendingScreen({ navigation }: any) {
         <Image source={Icons.faceHappy} style={styles.icon} resizeMode="contain" />
         <Text style={styles.title}>¡Registro recibido!</Text>
         <Text style={styles.body}>
-          Estamos revisando tu información.{'\n'}
-          Te notificaremos por correo cuando tu cuenta sea aprobada.
+          Estamos recibiendo tu{'\n'}información.{'\n'}
+          Te notificaremos por correo{'\n'}cuando tu cuenta sea aprobada.
         </Text>
 
         <View style={styles.infoBox}>
@@ -23,7 +23,7 @@ export default function RegistrationPendingScreen({ navigation }: any) {
           <Text style={styles.infoText}>Tiempo de revisión: 1-2 días hábiles</Text>
         </View>
 
-        <TouchableOpacity style={styles.btn} onPress={() => navigation.replace('Onboarding')}>
+        <TouchableOpacity style={styles.btn} onPress={() => navigation.replace('Login')}>
           <Text style={styles.btnText}>Ir al inicio</Text>
         </TouchableOpacity>
 

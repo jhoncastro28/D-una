@@ -1,13 +1,14 @@
 import React from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, StatusBar,
-  ScrollView, Switch, Alert,
+  View, Text, StyleSheet, TouchableOpacity, StatusBar, Image,
+  ScrollView, Switch, Alert, ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { C } from '../../constants';
 import BottomNav from '../../components/BottomNav';
 import { MOCK_EVENTS } from '../../constants/mockData';
 import DunaLogo from '../../components/DunaLogo';
+import { Icons } from '../../constants/icons';
 import { useAuth } from '../../context/AuthContext';
 
 export default function ProfileScreen({ navigation }: any) {
@@ -45,10 +46,11 @@ export default function ProfileScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <ImageBackground source={Icons.patternPurple} style={StyleSheet.absoluteFill} resizeMode="cover" pointerEvents="none" />
 
       <View style={styles.header}>
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>{'<'}</Text>
+          <Image source={Icons.arrowBack} style={styles.backIcon} resizeMode="contain" />
         </TouchableOpacity>
         <DunaLogo size="small" />
       </View>
@@ -161,13 +163,13 @@ function StatBox({ label, value, small }: { label: string; value: string; small?
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.purple },
+  container: { flex: 1, backgroundColor: C.purple, overflow: 'hidden' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     paddingTop: 52, paddingBottom: 16, paddingHorizontal: 24,
   },
   back: { position: 'absolute', left: 24, top: 52 },
-  backText: { color: C.white, fontSize: 28, fontFamily: 'Poppins_700Bold' },
+  backIcon: { width: 28, height: 28 },
   scroll: { paddingBottom: 8 },
 
   profileSection: { alignItems: 'center', paddingVertical: 24 },

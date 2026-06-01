@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, StatusBar, Image,
+  View, Text, StyleSheet, TouchableOpacity, StatusBar, Image, ImageBackground,
 } from 'react-native';
 import { C } from '../../constants';
 import { Icons } from '../../constants/icons';
@@ -10,10 +10,11 @@ export default function AccountTypeScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <ImageBackground source={Icons.patternPurple} style={StyleSheet.absoluteFill} resizeMode="cover" pointerEvents="none" />
 
       <View style={styles.top}>
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>{'<'}</Text>
+          <Image source={Icons.arrowBack} style={styles.backIcon} resizeMode="contain" />
         </TouchableOpacity>
         <DunaLogo size="large" />
       </View>
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.purple },
   top: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 48 },
   back: { position: 'absolute', top: 52, left: 24 },
-  backText: { color: C.white, fontSize: 28, fontFamily: 'Poppins_700Bold' },
+  backIcon: { width: 28, height: 28 },
   card: {
     backgroundColor: C.white,
     borderTopLeftRadius: 36,

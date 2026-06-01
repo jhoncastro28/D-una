@@ -40,6 +40,7 @@ export interface CreatorRegistration {
   instagram: string;
   contactEmail: string;
   phone: string;
+  termsAccepted: boolean;
   status: RegistrationStatus;
   submittedAt: string;
 }
@@ -49,6 +50,7 @@ export interface DunaEvent {
   title: string;
   category: string;
   date: string;
+  dateISO: string;
   time: string;
   location: string;
   municipality: string;
@@ -72,6 +74,7 @@ export interface CreatorFormData {
   instagram?: string;
   contactEmail?: string;
   phone?: string;
+  termsAccepted?: boolean;
 }
 
 const ADMIN_EMAIL = 'admin@duna.com';
@@ -84,6 +87,20 @@ const EVENTS_KEY = '@duna_events';
 
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 
+const MONTH_TO_NUM: Record<string, string> = {
+  enero:'01', febrero:'02', marzo:'03', abril:'04', mayo:'05', junio:'06',
+  julio:'07', agosto:'08', septiembre:'09', octubre:'10', noviembre:'11', diciembre:'12',
+};
+
+const parseDateToISO = (dateStr: string): string => {
+  const m = dateStr.toLowerCase().trim().match(/^(\d{1,2})\s+de\s+(\w+)$/);
+  if (!m) return '';
+  const month = MONTH_TO_NUM[m[2]];
+  if (!month) return '';
+  const year = new Date().getFullYear();
+  return `${year}-${month}-${m[1].padStart(2, '0')}`;
+};
+
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
@@ -92,7 +109,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ role: Role; registrationStatus?: RegistrationStatus }>;
   registerPublico: (name: string, email: string, password: string, municipality: string) => Promise<void>;
   logout: () => Promise<void>;
-  toggleSaved: (eventId: string) => void;
+  toggleSaved: (eventId: string) => Promise<void>;
   isSaved: (eventId: string) => boolean;
   updateCreatorFormData: (data: Partial<CreatorFormData>) => void;
   submitCreatorRegistration: () => Promise<void>;
@@ -100,7 +117,9 @@ interface AuthContextType {
   approveCreator: (id: string) => Promise<void>;
   rejectCreator: (id: string) => Promise<void>;
   updateUser: (data: Partial<StoredUser>) => Promise<void>;
-  createEvent: (data: Omit<DunaEvent, 'id' | 'creatorId' | 'creatorName' | 'createdAt'>) => Promise<void>;
+  createEvent: (data: Omit<DunaEvent, 'id' | 'creatorId' | 'creatorName' | 'createdAt' | 'dateISO'>) => Promise<void>;
+  deleteEvent: (id: string) => Promise<void>;
+  resetAllData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -123,21 +142,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const [sessionRaw, eventsRaw] = await Promise.all([
-          AsyncStorage.getItem(SESSION_KEY),
-          AsyncStorage.getItem(EVENTS_KEY),
-        ]);
+        // Solo cargamos eventos persistidos — la sesión NO se restaura
+        const eventsRaw = await AsyncStorage.getItem(EVENTS_KEY);
         if (eventsRaw) setUserEvents(JSON.parse(eventsRaw));
-        if (!sessionRaw) { setLoading(false); return; }
-        const session = JSON.parse(sessionRaw);
-        if (session.role === 'admin') {
-          setUser(adminUser);
-        } else {
-          const usersRaw = await AsyncStorage.getItem(USERS_KEY);
-          const users: StoredUser[] = usersRaw ? JSON.parse(usersRaw) : [];
-          const found = users.find(u => u.id === session.id);
-          if (found) setUser(storedToAuth(found));
-        }
       } catch (_) {}
       setLoading(false);
     })();
@@ -165,7 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const saveSession = async (u: AuthUser) => {
     setUser(u);
-    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify({ id: u.id, role: u.role }));
+    // Sesión solo en memoria — no persiste entre aperturas de la app
   };
 
   const login = async (email: string, password: string) => {
@@ -249,6 +256,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       instagram: '',
       contactEmail: lowerEmail,
       phone: '',
+      termsAccepted: false,
       status: 'pending',
       submittedAt: new Date().toISOString(),
     };
@@ -313,6 +321,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       instagram: d.instagram ?? '',
       contactEmail: d.contactEmail ?? lowerEmail,
       phone: d.phone ?? '',
+      termsAccepted: d.termsAccepted ?? false,
       status: 'pending',
       submittedAt: new Date().toISOString(),
     };
@@ -360,11 +369,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(REGISTRATIONS_KEY, JSON.stringify(regs));
   };
 
-  const createEvent = async (data: Omit<DunaEvent, 'id' | 'creatorId' | 'creatorName' | 'createdAt'>) => {
+  const deleteEvent = async (id: string) => {
+    const updated = userEvents.filter(e => e.id !== id);
+    setUserEvents(updated);
+    await AsyncStorage.setItem(EVENTS_KEY, JSON.stringify(updated));
+  };
+
+  const resetAllData = async () => {
+    await AsyncStorage.multiRemove([
+      USERS_KEY, SESSION_KEY, REGISTRATIONS_KEY, EVENTS_KEY, '@duna_messages',
+    ]);
+    setUser(null);
+    setUserEvents([]);
+    setCreatorFormData({});
+  };
+
+  const createEvent = async (data: Omit<DunaEvent, 'id' | 'creatorId' | 'creatorName' | 'createdAt' | 'dateISO'>) => {
     if (!user) throw new Error('NOT_LOGGED_IN');
     const newEvent: DunaEvent = {
       id: generateId(),
       ...data,
+      dateISO: parseDateToISO(data.date),
       creatorId: user.id,
       creatorName: user.name,
       createdAt: new Date().toISOString(),
@@ -392,7 +417,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toggleSaved, isSaved,
       updateCreatorFormData, submitCreatorRegistration,
       getCreatorRegistrations, approveCreator, rejectCreator,
-      updateUser, createEvent,
+      updateUser, createEvent, deleteEvent, resetAllData,
     }}>
       {children}
     </AuthContext.Provider>

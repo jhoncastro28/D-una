@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, StatusBar,
+  View, Text, StyleSheet, TouchableOpacity, StatusBar, Image,
   Dimensions, ScrollView, TextInput, KeyboardAvoidingView,
-  Platform, ActivityIndicator, Alert,
+  Platform, ActivityIndicator, Alert, ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { C } from '../../constants';
+import { Icons } from '../../constants/icons';
 import DunaLogo from '../../components/DunaLogo';
 import { useAuth } from '../../context/AuthContext';
 
@@ -55,10 +56,11 @@ export default function LoginScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <ImageBackground source={Icons.patternPurple} style={StyleSheet.absoluteFill} resizeMode="cover" pointerEvents="none" />
 
       <View style={styles.top}>
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>{'<'}</Text>
+          <Image source={Icons.arrowBack} style={styles.backIcon} resizeMode="contain" />
         </TouchableOpacity>
         <DunaLogo size="large" showTagline />
       </View>
@@ -125,7 +127,6 @@ export default function LoginScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.adminHint}>Admin: admin@duna.com / admin123</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   back: { position: 'absolute', top: 52, left: 24 },
-  backText: { color: C.white, fontSize: 28, fontFamily: 'Poppins_700Bold' },
+  backIcon: { width: 28, height: 28 },
 
   card: {
     backgroundColor: C.white,
@@ -216,5 +217,4 @@ const styles = StyleSheet.create({
   registerHint: { color: C.gray, fontSize: 13 },
   registerLink: { color: C.purple, fontSize: 13, fontFamily: 'Poppins_700Bold', textDecorationLine: 'underline' },
 
-  adminHint: { color: C.gray, fontSize: 10, textAlign: 'center', opacity: 0.5 },
 });

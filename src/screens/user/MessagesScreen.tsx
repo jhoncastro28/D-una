@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, StatusBar,
   FlatList, TextInput, KeyboardAvoidingView, Platform,
-  ActivityIndicator,
+  ActivityIndicator, ImageBackground, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { C } from '../../constants';
+import { Icons } from '../../constants/icons';
 import BottomNav from '../../components/BottomNav';
 import { useAuth } from '../../context/AuthContext';
 
@@ -120,7 +121,7 @@ export default function MessagesScreen({ navigation }: any) {
       };
       setMessages(prev => {
         const next = { ...prev, [profileId]: [...(prev[profileId] ?? []), reply] };
-        AsyncStorage.setItem(MESSAGES_KEY, JSON.stringify(next));
+        AsyncStorage.setItem(MESSAGES_KEY, JSON.stringify(next)).catch(() => {});
         return next;
       });
     }, 1600);
@@ -158,11 +159,12 @@ export default function MessagesScreen({ navigation }: any) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+        <ImageBackground source={Icons.patternPurple} style={StyleSheet.absoluteFill} resizeMode="cover" pointerEvents="none" />
 
         {/* Header chat */}
         <View style={styles.chatHeader}>
           <TouchableOpacity onPress={() => setSelectedProfile(null)} style={styles.chatBack}>
-            <Ionicons name="arrow-back" size={22} color={C.white} />
+            <Image source={Icons.arrowBack} style={{ width: 26, height: 26 }} resizeMode="contain" />
           </TouchableOpacity>
           <View style={styles.chatAvatar}>
             <Text style={styles.chatAvatarText}>{selectedProfile.initials}</Text>
@@ -231,10 +233,11 @@ export default function MessagesScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <ImageBackground source={Icons.patternPurple} style={StyleSheet.absoluteFill} resizeMode="cover" pointerEvents="none" />
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={C.white} />
+          <Image source={Icons.arrowBack} style={{ width: 26, height: 26 }} resizeMode="contain" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Mensajes</Text>
         <View style={{ width: 36 }} />

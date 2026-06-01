@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, StatusBar,
+  View, Text, StyleSheet, TouchableOpacity, StatusBar, Image,
   ScrollView, TextInput, KeyboardAvoidingView, Platform,
-  Alert, ActivityIndicator,
+  Alert, ActivityIndicator, ImageBackground,
 } from 'react-native';
 import { C, BOYACA_MUNICIPALITIES } from '../../constants';
+import { Icons } from '../../constants/icons';
 import DunaLogo from '../../components/DunaLogo';
 import { useAuth } from '../../context/AuthContext';
 
@@ -52,10 +53,11 @@ export default function RegisterPublicScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <ImageBackground source={Icons.patternPurple} style={StyleSheet.absoluteFill} resizeMode="cover" pointerEvents="none" />
 
       <View style={styles.top}>
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>{'<'}</Text>
+          <Image source={Icons.arrowBack} style={styles.backIcon} resizeMode="contain" />
         </TouchableOpacity>
         <DunaLogo size="medium" />
       </View>
@@ -157,7 +159,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   back: { position: 'absolute', top: 52, left: 24 },
-  backText: { color: C.white, fontSize: 28, fontFamily: 'Poppins_700Bold' },
+  backIcon: { width: 28, height: 28 },
   card: {
     backgroundColor: C.white,
     borderTopLeftRadius: 36,

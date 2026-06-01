@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, StatusBar,
-  ScrollView, Image, Dimensions,
+  ScrollView, Image, Dimensions, ImageBackground,
 } from 'react-native';
 import { C, CREATOR_CATEGORIES } from '../../constants';
 import { Icons } from '../../constants/icons';
@@ -39,10 +39,11 @@ export default function CreatorStep2Screen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={C.purple} />
+      <ImageBackground source={Icons.patternPurple} style={styles.pattern} resizeMode="cover" pointerEvents="none" />
 
       <View style={styles.purpleTop}>
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>{'<'}</Text>
+          <Image source={Icons.arrowBack} style={styles.backIcon} resizeMode="contain" />
         </TouchableOpacity>
         <Text style={styles.stepLabel}>Paso 2 de 4</Text>
       </View>
@@ -62,11 +63,7 @@ export default function CreatorStep2Screen({ navigation }: any) {
                 onPress={() => toggle(cat.id)}
                 activeOpacity={0.85}
               >
-                <Image
-                  source={imgSource}
-                  style={styles.catImg}
-                  resizeMode="cover"
-                />
+                <Image source={imgSource} style={styles.catImg} resizeMode="cover" />
                 <View style={styles.catLabelRow}>
                   <Text style={styles.catLabel} numberOfLines={1}>{cat.label}</Text>
                   {active && (
@@ -92,9 +89,10 @@ export default function CreatorStep2Screen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.purple },
+  pattern: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   purpleTop: { height: 90, justifyContent: 'flex-end', paddingBottom: 10, paddingHorizontal: 24 },
   back: { position: 'absolute', top: 52, left: 24 },
-  backText: { color: C.white, fontSize: 28, fontFamily: 'Poppins_700Bold' },
+  backIcon: { width: 28, height: 28 },
   stepLabel: {
     color: 'rgba(255,255,255,0.6)', fontSize: 12,
     textAlign: 'right', fontFamily: 'Poppins_600SemiBold',
@@ -105,50 +103,24 @@ const styles = StyleSheet.create({
   },
   title: { color: C.purple, fontSize: 22, fontFamily: 'Poppins_900Black', marginBottom: 6 },
   sub: { color: C.gray, fontSize: 13, marginBottom: 22 },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: CARD_GAP,
-    marginBottom: 28,
-  },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: CARD_GAP, marginBottom: 28 },
   catBtn: {
-    width: CARD_W,
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: 'transparent',
-    backgroundColor: C.grayLight,
+    width: CARD_W, borderRadius: 16, overflow: 'hidden',
+    borderWidth: 2, borderColor: 'transparent', backgroundColor: C.grayLight,
   },
   catBtnActive: { borderColor: C.pink },
-  catImg: {
-    width: CARD_W,
-    height: CARD_H,
-  },
+  catImg: { width: CARD_W, height: CARD_H },
   catLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    backgroundColor: C.white,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 10, paddingVertical: 8, backgroundColor: C.white,
   },
-  catLabel: {
-    color: C.textDark,
-    fontSize: 12,
-    fontFamily: 'Poppins_600SemiBold',
-    flex: 1,
-  },
+  catLabel: { color: C.textDark, fontSize: 12, fontFamily: 'Poppins_600SemiBold', flex: 1 },
   checkCircle: {
-    width: 20, height: 20, borderRadius: 10,
-    backgroundColor: C.pink,
-    alignItems: 'center', justifyContent: 'center',
-    marginLeft: 4,
+    width: 20, height: 20, borderRadius: 10, backgroundColor: C.pink,
+    alignItems: 'center', justifyContent: 'center', marginLeft: 4,
   },
   checkMark: { color: C.white, fontSize: 11, fontFamily: 'Poppins_900Black' },
-  activeOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,0,124,0.08)',
-  },
+  activeOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,0,124,0.08)' },
   nextRow: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' },
   nextText: { color: C.purple, fontSize: 17, fontFamily: 'Poppins_800ExtraBold' },
   nextArrow: { color: C.purple, fontSize: 28, fontFamily: 'Poppins_700Bold' },
