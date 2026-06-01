@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, StatusBar, Image, ImageBackground,
+  View, Text, StyleSheet, TouchableOpacity, StatusBar, Image, ImageBackground, Platform,
 } from 'react-native';
 import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
@@ -44,7 +44,7 @@ export default function MapScreen({ navigation }: any) {
       {/* Google Maps */}
       <View style={styles.mapWrap}>
         <MapView
-          provider={PROVIDER_GOOGLE}
+          provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
           style={styles.map}
           initialRegion={BOYACA_REGION}
         >

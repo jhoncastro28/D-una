@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  StatusBar, Image, Dimensions,
+  StatusBar, Image, Dimensions, Platform,
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
@@ -142,7 +142,7 @@ export default function FeedScreen({ navigation }: any) {
           <Text style={styles.mapCity}>{municipality}</Text>
           <View style={[styles.mapBg, { height: mapW * 0.62 }]} pointerEvents="none">
             <MapView
-              provider={PROVIDER_GOOGLE}
+              provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
               style={StyleSheet.absoluteFill}
               initialRegion={mapRegion}
               scrollEnabled={false}
